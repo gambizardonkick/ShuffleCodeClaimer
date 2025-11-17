@@ -998,7 +998,7 @@ app.post('/api/telegram-message', async (req, res) => {
   }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 API server running on port ${PORT}`);
   console.log(`📡 Webhook URL: http://0.0.0.0:${PORT}/api/oxapay/webhook`);
   console.log(`📊 Admin Dashboard: http://0.0.0.0:${PORT}/admin.html`);
@@ -1125,7 +1125,10 @@ async function startBots() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: messageText })
                   });
-                } catch (apiErr) {}
+                  console.log(`   ✓ Sent to code detection API`);
+                } catch (apiErr) {
+                  console.error(`   ✗ Code detection API call failed: ${apiErr.message}`);
+                }
               } catch (error) {
                 console.error(`   ✗ Forward failed: ${error.message}`);
               }
@@ -1154,14 +1157,16 @@ async function startBots() {
 }
 
 if (require.main === module) {
-  setTimeout(async () => {
-    try {
-      await startBots();
-    } catch (error) {
-      console.error('💥 Bot startup error:', error);
-      console.error(error.stack);
-    }
-  }, 1000);
+  server.on('listening', async () => {
+    setTimeout(async () => {
+      try {
+        await startBots();
+      } catch (error) {
+        console.error('💥 Bot startup error:', error);
+        console.error(error.stack);
+      }
+    }, 500);
+  });
 }
 
 module.exports = app;
