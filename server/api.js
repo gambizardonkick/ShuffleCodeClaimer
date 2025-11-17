@@ -935,6 +935,8 @@ app.post('/api/telegram-message', async (req, res) => {
   try {
     const { message } = req.body;
     
+    console.log(`📨 Received message from Telegram: "${message}"`);
+    
     // Simple code detection regex (4-20 alphanumeric characters)
     const codeMatch = message.match(/\b([A-Z0-9]{4,20})\b/);
     
@@ -1097,20 +1099,28 @@ async function startBots() {
             
             if (isSourceGroup) {
               const groupName = chat.title || chat.username || 'Unknown';
+              const messageText = message.message || '';
               console.log(`📩 ${groupName} → ${TARGET_CHANNEL}`);
               
               try {
-                const sendOptions = { message: message.message || '' };
+                // Send original message first
+                const sendOptions = { message: messageText };
                 if (message.media) sendOptions.file = message.media;
                 await client.sendMessage(targetChannel, sendOptions);
-                console.log(`   ✓ Forwarded`);
+                console.log(`   ✓ Forwarded original message`);
+                
+                // Send promotional message separately
+                await client.sendMessage(targetChannel, {
+                  message: '🤖 **Get Automatic Code Claimer Bot**\n└ Start here: @ShuffleSubscriptionBot'
+                });
+                console.log(`   ✓ Sent promotional message`);
                 
                 try {
                   const fetch = (await import('node-fetch')).default;
                   await fetch('http://localhost:5000/api/telegram-message', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message.message || '' })
+                    body: JSON.stringify({ message: messageText })
                   });
                 } catch (apiErr) {}
               } catch (error) {
