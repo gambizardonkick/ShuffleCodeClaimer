@@ -14,6 +14,7 @@
     "api": "node server/api.js",
     "subscription-bot": "node subscription-bot-v2.js",
     "telegram-bot": "node client.js",
+    "combined-worker": "node combined-worker.js",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
