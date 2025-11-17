@@ -20,7 +20,7 @@ async function startCombinedWorker() {
 
   try {
     if (process.env.TELEGRAM_API_ID && process.env.TELEGRAM_API_HASH) {
-      const { TelegramClient } = require("telegram");
+      const { TelegramClient, Button } = require("telegram");
       const { StringSession } = require("telegram/sessions");
       const { NewMessage } = require("telegram/events");
 
@@ -91,11 +91,13 @@ async function startCombinedWorker() {
             
             if (isSourceGroup) {
               const groupName = chat.title || chat.username || 'Unknown';
-              console.log(`📩 New message from: ${groupName}`);
+              const messageText = message.message || '';
+              console.log(`📩 ${groupName} → ${TARGET_CHANNEL}`);
               
               try {
+                // Send original message first
                 const sendOptions = {
-                  message: message.message || '',
+                  message: messageText,
                 };
                 
                 if (message.media) {
@@ -103,7 +105,13 @@ async function startCombinedWorker() {
                 }
                 
                 await client.sendMessage(targetChannel, sendOptions);
-                console.log(`✓ Sent to ${TARGET_CHANNEL}`);
+                console.log(`   ✓ Forwarded original message`);
+                
+                // Send promotional message separately
+                await client.sendMessage(targetChannel, {
+                  message: '🤖 **Get Automatic Code Claimer Bot**\n└ Start here: @ShuffleSubscriptionBot'
+                });
+                console.log(`   ✓ Sent promotional message`);
                 
                 try {
                   const fetch = (await import('node-fetch')).default;
