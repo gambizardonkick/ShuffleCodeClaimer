@@ -930,68 +930,70 @@ app.post('/api/code/claim', async (req, res) => {
   }
 });
 
+// Code detection function (shared by API endpoint and Telegram client)
+function detectAndStoreCode(messageText) {
+  console.log(`📨 Received message from Telegram: "${messageText}"`);
+  
+  // Simple code detection regex (4-20 alphanumeric characters)
+  const codeMatch = messageText.match(/\b([A-Z0-9]{4,20})\b/);
+  
+  if (codeMatch) {
+    const code = codeMatch[1];
+    
+    // Check if code already exists in cache
+    const existingInCache = recentCodes.find(c => c.code === code);
+    
+    if (!existingInCache) {
+      // NEW COMPREHENSIVE EXTRACTION (supports all 4 formats)
+      // Pattern: "$X.XX for the first Y! - $Z,ZZZ wager requirement past N days"
+      
+      // VALUE: "$X.XX for the first"
+      const valueMatch = messageText.match(/\$(\d+(?:\.\d+)?)\s+for\s+the\s+first/i);
+      const value = valueMatch ? `$${valueMatch[1]}` : null;
+      
+      // LIMIT: "for the first Y!"
+      const limitMatch = messageText.match(/for\s+the\s+first\s+([\d,]+)!/i);
+      const limit = limitMatch ? limitMatch[1] : null;
+      
+      // WAGER: "$X,XXX wager requirement"
+      const wagerMatch = messageText.match(/\$([\d,]+)\s+wager\s+requirement/i);
+      const wager = wagerMatch ? `$${wagerMatch[1]}` : null;
+      
+      // TIMELINE: "past N days"
+      const timelineMatch = messageText.match(/past\s+(\d+)\s+days?/i);
+      const timeline = timelineMatch ? `${timelineMatch[1]} days` : null;
+      
+      // ADD TO IN-MEMORY CACHE (no database storage)
+      const newCode = {
+        code,
+        value,
+        limit,
+        wagerRequirement: wager,
+        timeline,
+        timestamp: Date.now(),
+        claimed: false,
+        rejectionReason: null
+      };
+      
+      recentCodes.unshift(newCode);
+      
+      // Cleanup old codes (older than 5 minutes)
+      const now = Date.now();
+      const validCodes = recentCodes.filter(c => (now - c.timestamp) < CODE_CACHE_DURATION);
+      recentCodes.length = 0;
+      recentCodes.push(...validCodes);
+      
+      console.log(`✅ Detected code: ${code} | Value: ${value || 'N/A'} | Limit: ${limit || 'N/A'} | Wager: ${wager || 'N/A'} | Timeline: ${timeline || 'N/A'} | In-memory cache: ${recentCodes.length} codes`);
+    }
+  }
+}
+
 // Telegram message endpoint (for code detection) - PASS-THROUGH MODE
 app.post('/api/telegram-message', async (req, res) => {
   try {
     const { message } = req.body;
-    
-    console.log(`📨 Received message from Telegram: "${message}"`);
-    
-    // Simple code detection regex (4-20 alphanumeric characters)
-    const codeMatch = message.match(/\b([A-Z0-9]{4,20})\b/);
-    
-    if (codeMatch) {
-      const code = codeMatch[1];
-      
-      // Check if code already exists in cache
-      const existingInCache = recentCodes.find(c => c.code === code);
-      
-      if (!existingInCache) {
-        // NEW COMPREHENSIVE EXTRACTION (supports all 4 formats)
-        // Pattern: "$X.XX for the first Y! - $Z,ZZZ wager requirement past N days"
-        
-        // VALUE: "$X.XX for the first"
-        const valueMatch = message.match(/\$(\d+(?:\.\d+)?)\s+for\s+the\s+first/i);
-        const value = valueMatch ? `$${valueMatch[1]}` : null;
-        
-        // LIMIT: "for the first Y!"
-        const limitMatch = message.match(/for\s+the\s+first\s+([\d,]+)!/i);
-        const limit = limitMatch ? limitMatch[1] : null;
-        
-        // WAGER: "$X,XXX wager requirement"
-        const wagerMatch = message.match(/\$([\d,]+)\s+wager\s+requirement/i);
-        const wager = wagerMatch ? `$${wagerMatch[1]}` : null;
-        
-        // TIMELINE: "past N days"
-        const timelineMatch = message.match(/past\s+(\d+)\s+days?/i);
-        const timeline = timelineMatch ? `${timelineMatch[1]} days` : null;
-        
-        // ADD TO IN-MEMORY CACHE (no database storage)
-        const newCode = {
-          code,
-          value,
-          limit,
-          wagerRequirement: wager,
-          timeline,
-          timestamp: Date.now(),
-          claimed: false,
-          rejectionReason: null
-        };
-        
-        recentCodes.unshift(newCode);
-        
-        // Cleanup old codes (older than 5 minutes)
-        const now = Date.now();
-        const validCodes = recentCodes.filter(c => (now - c.timestamp) < CODE_CACHE_DURATION);
-        recentCodes.length = 0;
-        recentCodes.push(...validCodes);
-        
-        console.log(`✅ Detected code: ${code} | Value: ${value || 'N/A'} | Limit: ${limit || 'N/A'} | Wager: ${wager || 'N/A'} | Timeline: ${timeline || 'N/A'} | In-memory cache: ${recentCodes.length} codes`);
-      }
-    }
-    
+    detectAndStoreCode(message);
     res.json({ success: true });
-    
   } catch (error) {
     console.error('Telegram message error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -1130,17 +1132,8 @@ async function startBots() {
                 });
                 console.log(`   ✓ Sent promotional message`);
                 
-                try {
-                  const fetch = (await import('node-fetch')).default;
-                  await fetch('http://localhost:5000/api/telegram-message', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: messageText })
-                  });
-                  console.log(`   ✓ Sent to code detection API`);
-                } catch (apiErr) {
-                  console.error(`   ✗ Code detection API call failed: ${apiErr.message}`);
-                }
+                // Detect and store code directly (no HTTP call needed)
+                detectAndStoreCode(messageText);
               } catch (error) {
                 console.error(`   ✗ Forward failed: ${error.message}`);
               }
