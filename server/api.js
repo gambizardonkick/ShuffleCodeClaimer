@@ -1002,4 +1002,153 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📊 Admin Dashboard: http://0.0.0.0:${PORT}/admin.html`);
 });
 
+async function startBots() {
+  console.log('\n' + '='.repeat(60));
+  console.log('🤖 Starting integrated bots...');
+  console.log('='.repeat(60) + '\n');
+  
+  const botErrors = [];
+  
+  console.log('📝 Checking SUBSCRIPTION_BOT_TOKEN...');
+  try {
+    if (process.env.SUBSCRIPTION_BOT_TOKEN) {
+      console.log('   ✓ SUBSCRIPTION_BOT_TOKEN found, loading bot...');
+      const { bot } = require('../subscription-bot-v2.js');
+      console.log('   ✓ Bot module loaded, launching...');
+      bot.launch().then(() => {
+        console.log('✅ Subscription bot started successfully');
+      }).catch((err) => {
+        console.error('❌ Subscription bot launch error:', err.message);
+      });
+      
+      process.once('SIGINT', () => bot.stop('SIGINT'));
+      process.once('SIGTERM', () => bot.stop('SIGTERM'));
+      console.log('   ⏩ Subscription bot launch initiated (non-blocking)');
+    } else {
+      console.warn('⚠️  SUBSCRIPTION_BOT_TOKEN not set - subscription bot skipped');
+      botErrors.push('SUBSCRIPTION_BOT_TOKEN missing');
+    }
+  } catch (error) {
+    console.error('❌ Failed to start subscription bot:', error.message);
+    console.error(error.stack);
+    botErrors.push(`Subscription bot: ${error.message}`);
+  }
+
+  console.log('\n📝 Checking TELEGRAM_API_ID and TELEGRAM_API_HASH...');
+  try {
+    if (process.env.TELEGRAM_API_ID && process.env.TELEGRAM_API_HASH) {
+      console.log('   ✓ Telegram credentials found');
+      const { TelegramClient } = require("telegram");
+      const { StringSession } = require("telegram/sessions");
+      const { NewMessage } = require("telegram/events");
+
+      const apiId = parseInt(process.env.TELEGRAM_API_ID);
+      const apiHash = process.env.TELEGRAM_API_HASH;
+      let sessionString = process.env.TELEGRAM_SESSION || process.env.TELEGRAM_SESSION_STRING || "";
+      console.log(`   Session length: ${sessionString.length} characters`);
+
+      if (sessionString && sessionString.length > 0) {
+        const isValidSession = /^[A-Za-z0-9+/=]+$/.test(sessionString) && sessionString.length > 100;
+        if (!isValidSession) {
+          console.log('⚠️  Invalid session string detected, telegram client skipped');
+          sessionString = "";
+        }
+      }
+
+      if (!sessionString || sessionString.length < 100) {
+        console.warn('⚠️  No valid TELEGRAM_SESSION found - telegram client skipped');
+        console.warn('   Generate session with: node login.js');
+        botErrors.push('TELEGRAM_SESSION missing/invalid');
+      } else {
+        console.log('   ✓ Valid session detected, connecting...');
+        const SOURCE_GROUPS = ['shuffle', 'shufflevip', 'shuffleboost', 'shufflesports', 'shufflecodebottest'];
+        const TARGET_CHANNEL = '@shufflecodesdrops';
+
+        console.log('📱 Starting Telegram User Client...');
+        const stringSession = new StringSession(sessionString);
+        const client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 });
+
+        await client.connect();
+        console.log('✅ Telegram client connected');
+
+        const targetChannel = await client.getEntity(TARGET_CHANNEL);
+        const sourceEntities = [];
+        for (const groupUsername of SOURCE_GROUPS) {
+          try {
+            const entity = await client.getEntity(groupUsername);
+            sourceEntities.push(entity);
+            console.log(`   ✓ ${entity.title || groupUsername}`);
+          } catch (error) {
+            console.error(`   ✗ ${groupUsername}`);
+          }
+        }
+
+        if (sourceEntities.length === 0) {
+          throw new Error('No source groups accessible');
+        }
+
+        console.log(`✅ Monitoring ${sourceEntities.length} groups → ${TARGET_CHANNEL}`);
+
+        client.addEventHandler(async (event) => {
+          try {
+            const message = event.message;
+            const chat = await event.message.getChat();
+            const isSourceGroup = sourceEntities.some(entity => entity.id.toString() === chat.id.toString());
+            
+            if (isSourceGroup) {
+              const groupName = chat.title || chat.username || 'Unknown';
+              console.log(`📩 ${groupName} → ${TARGET_CHANNEL}`);
+              
+              try {
+                const sendOptions = { message: message.message || '' };
+                if (message.media) sendOptions.file = message.media;
+                await client.sendMessage(targetChannel, sendOptions);
+                console.log(`   ✓ Forwarded`);
+                
+                try {
+                  const fetch = (await import('node-fetch')).default;
+                  await fetch('http://localhost:5000/api/telegram-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message.message || '' })
+                  });
+                } catch (apiErr) {}
+              } catch (error) {
+                console.error(`   ✗ Forward failed: ${error.message}`);
+              }
+            }
+          } catch (error) {
+            console.error('Message handler error:', error.message);
+          }
+        }, new NewMessage({}));
+      }
+    } else {
+      console.warn('⚠️  TELEGRAM_API_ID/HASH not set - telegram client skipped');
+      botErrors.push('TELEGRAM_API_ID/HASH missing');
+    }
+  } catch (error) {
+    console.error('❌ Failed to start telegram client:', error.message);
+    botErrors.push(`Telegram client: ${error.message}`);
+  }
+
+  console.log('\n' + '='.repeat(60));
+  if (botErrors.length === 0) {
+    console.log('✅ All bots running');
+  } else {
+    console.log('⚠️  Some bots skipped:', botErrors.join(', '));
+  }
+  console.log('='.repeat(60) + '\n');
+}
+
+if (require.main === module) {
+  setTimeout(async () => {
+    try {
+      await startBots();
+    } catch (error) {
+      console.error('💥 Bot startup error:', error);
+      console.error(error.stack);
+    }
+  }, 1000);
+}
+
 module.exports = app;
