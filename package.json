@@ -8,15 +8,7 @@
     "npm": "10.x"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm install",
-    "start": "node server/api.js",
-    "api": "node server/api.js",
-    "subscription-bot": "node subscription-bot-v2.js",
-    "telegram-bot": "node client.js",
-    "combined-worker": "node combined-worker.js",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "start": "node server/api.js"
   },
   "keywords": ["shuffle", "telegram", "bot", "crypto"],
   "author": "",
