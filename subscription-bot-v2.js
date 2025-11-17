@@ -478,7 +478,12 @@ async function grantFreeTrial(ctx, user, usernames) {
       `   (${expiryDateStr} ${expiryTimeStr} UTC)\n\n` +
       `After your trial ends, choose a subscription plan to continue enjoying auto-claiming!\n\n` +
       `🎰 *Start using it now - codes will auto-claim automatically!*`,
-      { parse_mode: 'Markdown' }
+      { 
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+          [Markup.button.url('🚀 Setup Your Bot Now', 'https://shufflecodeclaimer.onrender.com/#guide')]
+        ])
+      }
     );
     
     // Show subscription button for later
@@ -547,7 +552,12 @@ async function notifyPaymentConfirmed(telegramUserId, messageId, subscriptionDet
       `🎰 *Your accounts are now connected and will auto-claim codes!*\n\n` +
       `Active accounts:\n` +
       subscriptionDetails.usernames.map((u, i) => `  ${i + 1}. ${u}`).join('\n'),
-      { parse_mode: 'Markdown' }
+      { 
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+          [Markup.button.url('🚀 Setup Your Bot Now', 'https://shufflecodeclaimer.onrender.com/#guide')]
+        ])
+      }
     );
   } catch (error) {
     console.error('Error updating payment message:', error);
