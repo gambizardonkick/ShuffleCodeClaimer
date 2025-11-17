@@ -1017,14 +1017,17 @@ async function startBots() {
       console.log('   ✓ SUBSCRIPTION_BOT_TOKEN found, loading bot...');
       const { bot } = require('../subscription-bot-v2.js');
       console.log('   ✓ Bot module loaded, launching...');
+      
+      let botRunning = false;
       bot.launch().then(() => {
         console.log('✅ Subscription bot started successfully');
+        botRunning = true;
       }).catch((err) => {
         console.error('❌ Subscription bot launch error:', err.message);
       });
       
-      process.once('SIGINT', () => bot.stop('SIGINT'));
-      process.once('SIGTERM', () => bot.stop('SIGTERM'));
+      process.once('SIGINT', () => { if (botRunning) bot.stop('SIGINT'); });
+      process.once('SIGTERM', () => { if (botRunning) bot.stop('SIGTERM'); });
       console.log('   ⏩ Subscription bot launch initiated (non-blocking)');
     } else {
       console.warn('⚠️  SUBSCRIPTION_BOT_TOKEN not set - subscription bot skipped');
