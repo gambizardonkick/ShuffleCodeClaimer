@@ -751,19 +751,36 @@ app.get('/api/admin/users', async (req, res) => {
       return res.status(403).json({ error: 'Unauthorized' });
     }
     
-    const accounts = await db.select({
-      id: shuffleAccounts.id,
-      username: shuffleAccounts.username,
-      status: shuffleAccounts.status,
-      expiryAt: shuffleAccounts.expiryAt,
-      createdAt: shuffleAccounts.createdAt,
-      telegramUserId: users.telegramUserId,
-    })
-    .from(shuffleAccounts)
-    .leftJoin(users, eq(shuffleAccounts.userId, users.id))
-    .orderBy(shuffleAccounts.createdAt);
+    const shuffleAccountsRef = firebaseDB.db.ref('shuffleAccounts');
+    const accountsSnapshot = await shuffleAccountsRef.orderByChild('createdAt').once('value');
     
-    res.json(accounts);
+    if (!accountsSnapshot.exists()) {
+      return res.json([]);
+    }
+    
+    const accounts = [];
+    const userPromises = [];
+    
+    accountsSnapshot.forEach((childSnapshot) => {
+      const account = childSnapshot.val();
+      const accountId = parseInt(childSnapshot.key);
+      
+      const userPromise = firebaseDB.findUserById(account.userId).then(user => ({
+        id: accountId,
+        username: account.username,
+        status: account.status,
+        expiryAt: account.expiryAt,
+        createdAt: account.createdAt,
+        telegramUserId: user ? user.telegramUserId : null,
+      }));
+      
+      userPromises.push(userPromise);
+    });
+    
+    const accountsWithUsers = await Promise.all(userPromises);
+    accountsWithUsers.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    
+    res.json(accountsWithUsers);
     
   } catch (error) {
     console.error('Get users error:', error);
@@ -782,8 +799,18 @@ app.delete('/api/admin/users/:id', async (req, res) => {
     
     const id = parseInt(req.params.id);
     
-    await db.delete(authSessions).where(eq(authSessions.shuffleAccountId, id));
-    await db.delete(shuffleAccounts).where(eq(shuffleAccounts.id, id));
+    const authSessionsRef = firebaseDB.db.ref('authSessions');
+    const sessionsSnapshot = await authSessionsRef.orderByChild('shuffleAccountId').equalTo(id).once('value');
+    
+    if (sessionsSnapshot.exists()) {
+      const deletePromises = [];
+      sessionsSnapshot.forEach((childSnapshot) => {
+        deletePromises.push(authSessionsRef.child(childSnapshot.key).remove());
+      });
+      await Promise.all(deletePromises);
+    }
+    
+    await firebaseDB.db.ref(`shuffleAccounts/${id}`).remove();
     
     res.json({ success: true });
     
