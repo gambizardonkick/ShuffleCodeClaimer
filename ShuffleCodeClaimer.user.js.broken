@@ -1,0 +1,1346 @@
+// ==UserScript==
+// @name         Shuffle Code Claimer
+// @namespace    http://www.shufflecodeclaimer.com/
+// @version      3.1.0
+// @description  Premium Code Claimer - Auto-Check on Page Load, Username-Only Auth
+// @author       ShuffleHelper
+// @match        https://shuffle.com/*
+// @match        https://shuffle.bet/*
+// @grant        GM_openInTab
+// @grant        GM_notification
+// @grant        GM_xmlhttpRequest
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_deleteValue
+// @connect      608696b3-6d88-42a1-839f-299b61f9cd75-00-23qavlu7g9piu.sisko.replit.dev
+// @icon         https://shuffle.com/favicon.ico
+// @run-at       document-end
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    const API_URL = 'https://608696b3-6d88-42a1-839f-299b61f9cd75-00-23qavlu7g9piu.sisko.replit.dev';
+    const GRAPHQL_URL = 'https://shuffle.com/main-api/graphql/api/graphql';
+    
+    // RESET ON EVERY REFRESH (prevents account switching)
+    GM_deleteValue('accessToken');
+    GM_deleteValue('refreshToken');
+    GM_deleteValue('isAuthenticated');
+    GM_deleteValue('processedCodes');
+    
+    // Fresh state for this session
+    let codes = [];
+    let processedCodes = {};
+    let username = null;
+    let isAuthenticated = false;
+    let accessToken = null;
+    let refreshToken = null;
+    let subscriptionExpiry = null;
+    
+    // Performance - all timeouts in milliseconds
+    const TIMEOUTS = {
+        POLL_CODES: 3000,           // Poll dashboard every 3s
+        UI_UPDATE: 100,             // UI updates every 100ms
+        AUTO_CLICK: 200,            // Auto-click redeem button after 200ms
+        VIP_PAGE_WAIT: 500,         // Wait for VIP page to load
+        CONNECT_RETRY: 300          // Retry connection after 300ms
+    };
+
+    // ============================================
+    // AUTHENTICATION FUNCTIONS
+    // ============================================
+    
+    function startConnect() {
+        showMessage('Navigating to VIP page...');
+        
+        // Navigate to VIP page to extract username
+        window.location.href = 'https://shuffle.com/vip-program';
+    }
+    
+    async function extractUsernameAndConnect() {
+        // Wait for page to load
+        await new Promise(resolve => setTimeout(resolve, TIMEOUTS.VIP_PAGE_WAIT));
+        
+        // Extract username from VIP page
+        const usernameEl = document.querySelector('.VipPageOverview_heading__dXCZl');
+        
+        if (usernameEl && usernameEl.textContent) {
+            username = usernameEl.textContent.trim().toLowerCase();
+            
+            // Show username in overlay
+            showMessage(`Found username: ${username}<br/>Authenticating...`);
+            
+            // Authenticate with backend
+            GM_xmlhttpRequest({
+                method: 'POST',
+                url: `${API_URL}/api/auth/connect`,
+                headers: { 'Content-Type': 'application/json' },
+                data: JSON.stringify({ shuffleUsername: username }),
+                onload: function(response) {
+                    try {
+                        const data = JSON.parse(response.responseText);
+                        
+                        if (data.success) {
+                            accessToken = data.accessToken;
+                            refreshToken = data.refreshToken;
+                            isAuthenticated = true;
+                            subscriptionExpiry = data.expiryAt;
+                            
+                            GM_notification({
+                                title: '✅ Connected!',
+                                text: `Account ${username} activated`,
+                                timeout: 2000
+                            });
+                            
+                            // Show full dashboard
+                            hideConnectOverlay();
+                            injectDashboard();
+                            startAutoRefresh();
+                        } else {
+                            showMessage(`❌ ${data.error || 'No active subscription'}`);
+                        }
+                    } catch (e) {
+                        showMessage(`❌ ${e.message || 'Connection failed'}`);
+                    }
+                },
+                onerror: function() {
+                    showMessage('❌ Connection failed. Please try again.');
+                }
+            });
+        } else {
+            showMessage('❌ Could not find username. Make sure you\'re logged in.');
+        }
+    }
+
+    // ============================================
+    // UI FUNCTIONS
+    // ============================================
+    
+    function showConnectOverlay() {
+        const overlay = document.getElementById('shuffle-connect-overlay');
+        if (overlay) return; // Already showing
+        
+        document.body.insertAdjacentHTML('beforeend', `
+        <div id="shuffle-connect-overlay" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        ">
+            <div style="
+                background: rgba(255,255,255,0.95);
+                border-radius: 24px;
+                padding: 60px;
+                text-align: center;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                max-width: 500px;
+                animation: slideUp 0.5s ease-out;
+            ">
+                <div style="
+                    width: 100px;
+                    height: 100px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 60px;
+                    margin: 0 auto 30px;
+                    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+                ">🎰</div>
+                
+                <h1 style="
+                    font-size: 36px;
+                    font-weight: 700;
+                    color: #2d3748;
+                    margin: 0 0 15px;
+                ">Shuffle Code Claimer</h1>
+                
+                <p id="connect-message" style="
+                    font-size: 18px;
+                    color: #718096;
+                    margin: 0 0 40px;
+                    line-height: 1.6;
+                ">Connect your account to automatically claim promotional codes</p>
+                
+                <button id="connect-btn" onclick="window.shuffleConnect()" style="
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    padding: 18px 48px;
+                    border-radius: 12px;
+                    font-size: 18px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+                ">
+                    🔗 Connect to Claim Codes
+                </button>
+            </div>
+            
+            <style>
+                @keyframes slideUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                #connect-btn:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+                }
+                
+                #connect-btn:active {
+                    transform: translateY(0);
+                }
+            </style>
+        </div>
+        `);
+        
+        // Make function globally available for onclick
+        window.shuffleConnect = startConnect;
+    }
+    
+    function hideConnectOverlay() {
+        const overlay = document.getElementById('shuffle-connect-overlay');
+        if (overlay) overlay.remove();
+    }
+    
+    function showMessage(msg) {
+        const msgEl = document.getElementById('connect-message');
+        if (msgEl) msgEl.innerHTML = msg;
+    }
+    
+    function injectDashboard() {
+        injectUI();
+    }
+    
+    function injectUI() {
+        const totalCodes = codes.length;
+        const claimedCodes = codes.filter(c => c.claimed).length;
+        const rejectedCodes = codes.filter(c => c.rejectionReason).length;
+        const pendingCodes = totalCodes - claimedCodes - rejectedCodes;
+        
+        // Show Connect button if not authenticated
+        const connectButton = !isAuthenticated ? `
+            <button id="shuffle-connect-btn" style="background: #ff4444;
+                border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 14px;
+                border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; animation: pulse 2s infinite;">
+                🔒 Connect to Claim Codes
+            </button>
+        ` : '';
+        
+        const statusIndicator = isAuthenticated ? 
+            `<div id="shuffle-status" style="padding: 5px 12px; background: rgba(0,255,136,0.2);
+                border: 1px solid #00ff88; border-radius: 5px; font-size: 12px; color: #00ff88;">
+                ✅ Active
+            </div>` :
+            `<div id="shuffle-status" style="padding: 5px 12px; background: rgba(255,68,68,0.2);
+                border: 1px solid #ff4444; border-radius: 5px; font-size: 12px; color: #ff4444;">
+                🔒 Not Connected
+            </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', `
+        <div id="shuffle-header" style="position: fixed; top: 0; left: 0; right: 0; z-index: 999999;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3); padding: 10px 20px; display: flex;
+            align-items: center; justify-content: space-between; font-family: 'Inter', 'Segoe UI', sans-serif;
+            color: #fff; font-size: 14px;">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <span style="font-weight:700; font-size:18px;">🎰 Shuffle Code Claimer</span>
+                <span style="font-size:11px; opacity:0.8;">v2.7 - Auth + Connect</span>
+                <span id="shuffle-username" style="font-size:13px; padding:4px 10px; background:rgba(255,255,255,0.2); border-radius:5px;">👤 ${username}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:20px;">
+                <div style="display:flex; gap:15px; font-size:13px;">
+                    <div><span style="opacity:0.8;">Total:</span> <b>${totalCodes}</b></div>
+                    <div><span style="opacity:0.8;">Claimed:</span> <b style="color:#00ff88;">${claimedCodes}</b></div>
+                    <div><span style="opacity:0.8;">Rejected:</span> <b style="color:#ff4444;">${rejectedCodes}</b></div>
+                    <div><span style="opacity:0.8;">Pending:</span> <b style="color:#ffa500;">${pendingCodes}</b></div>
+                </div>
+                ${statusIndicator}
+                ${connectButton}
+                <button id="shuffle-panel-btn" style="background: rgba(255,255,255,0.2);
+                    border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 14px;
+                    border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                    📊 Dashboard
+                </button>
+            </div>
+        </div>
+
+        <div id="shuffle-panel" style="position: fixed; top: 60px; right: 20px; bottom: 20px; z-index: 999998;
+            background: #1a1f2e; border: 1px solid #2a3f5f; border-radius: 12px; padding: 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 450px; display: none;
+            font-family: 'Inter', 'Segoe UI', sans-serif; color: #e0e6ed; overflow: hidden;
+            flex-direction: column;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:20px; border-bottom: 1px solid #2a3f5f;">
+                <h3 style="margin:0; color:#fff; font-size:20px;">📊 Code Dashboard</h3>
+                <button id="shuffle-panel-close" style="background:none; border:none; color:#fff; 
+                    font-size:22px; cursor:pointer; padding:0; width:30px; height:30px;">✕</button>
+            </div>
+
+            <div id="shuffle-codes-list" style="flex: 1; overflow-y: auto; padding: 15px;">
+                <!-- Codes loaded from API -->
+            </div>
+            
+            <!-- Scroll Controls -->
+            <div id="shuffle-scroll-controls" style="position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 10;">
+                <button id="scroll-up-btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); 
+                    color: #fff; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; 
+                    display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                    ⬆️
+                </button>
+                <button id="scroll-down-btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); 
+                    color: #fff; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; 
+                    display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                    ⬇️
+                </button>
+            </div>
+        </div>
+
+        <style>
+            #shuffle-codes-list::-webkit-scrollbar { width: 8px; }
+            #shuffle-codes-list::-webkit-scrollbar-track { background: #1a1f2e; }
+            #shuffle-codes-list::-webkit-scrollbar-thumb { background: #3a5f8f; border-radius: 4px; }
+            
+            #scroll-up-btn:hover, #scroll-down-btn:hover {
+                background: rgba(255,255,255,0.3);
+                transform: scale(1.1);
+            }
+            
+            .code-item {
+                background: rgba(255,255,255,0.05);
+                border: 1px solid #2a3f5f;
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 12px;
+                transition: all 0.3s ease;
+            }
+            .code-item:hover {
+                background: rgba(255,255,255,0.08);
+                transform: translateY(-2px);
+            }
+            .code-item.claimed {
+                background: rgba(0,255,136,0.1);
+                border-color: #00ff88;
+            }
+            .code-item.rejected {
+                background: rgba(255,68,68,0.1);
+                border-color: #ff4444;
+            }
+            .code-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            .code-value {
+                font-size: 20px;
+                font-weight: 700;
+                color: #667eea;
+                font-family: 'Courier New', monospace;
+            }
+            .code-badge {
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: 600;
+            }
+            .code-badge.claimed { background: #00ff88; color: #000; }
+            .code-badge.rejected { background: #ff4444; color: #fff; }
+            .code-badge.pending { background: #ffa500; color: #000; }
+            .code-info-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                margin: 10px 0;
+                padding: 10px;
+                background: rgba(0,0,0,0.2);
+                border-radius: 6px;
+                font-size: 12px;
+            }
+            .code-info-label {
+                opacity: 0.6;
+                font-size: 10px;
+                text-transform: uppercase;
+            }
+            .code-info-value {
+                font-weight: 600;
+                margin-top: 2px;
+            }
+            .code-rejection-reason {
+                background: rgba(255,68,68,0.2);
+                border-left: 3px solid #ff4444;
+                padding: 10px;
+                margin: 10px 0;
+                border-radius: 4px;
+                font-size: 12px;
+                color: #ffaaaa;
+            }
+        </style>
+        `);
+
+        document.getElementById('shuffle-panel-btn').onclick = togglePanel;
+        document.getElementById('shuffle-panel-close').onclick = togglePanel;
+        
+        // Connect button
+        const connectBtn = document.getElementById('shuffle-connect-btn');
+        if (connectBtn) {
+            connectBtn.onclick = connectAccount;
+        }
+        
+        // Scroll controls
+        document.getElementById('scroll-up-btn').onclick = () => {
+            const codesList = document.getElementById('shuffle-codes-list');
+            codesList.scrollBy({ top: -300, behavior: 'smooth' });
+        };
+        
+        document.getElementById('scroll-down-btn').onclick = () => {
+            const codesList = document.getElementById('shuffle-codes-list');
+            codesList.scrollBy({ top: 300, behavior: 'smooth' });
+        };
+
+        updateCodesList();
+    }
+    
+    // ============================================
+    // EXTRACT USERNAME FROM VIP PAGE
+    // ============================================
+    
+    function extractUsername() {
+        // Navigate to VIP page if not already there
+        if (!window.location.pathname.includes('/vip-program')) {
+            console.log('🔄 Navigating to VIP page to extract username...');
+            setTimeout(() => {
+                window.location.href = 'https://shuffle.com/vip-program';
+            }, 1000);
+            return;
+        }
+        
+        // Wait for page to load
+        const checkForUsername = setInterval(() => {
+            const usernameElement = document.querySelector('.VipPageOverview_heading__dXCZl');
+            
+            if (usernameElement) {
+                clearInterval(checkForUsername);
+                const extractedUsername = usernameElement.textContent.trim();
+                username = extractedUsername;
+                GM_setValue('shuffleUsername', extractedUsername);
+                console.log('✅ Username extracted:', extractedUsername);
+                
+                // Update UI with username
+                const usernameDisplay = document.getElementById('shuffle-username');
+                if (usernameDisplay) {
+                    usernameDisplay.textContent = `👤 ${extractedUsername}`;
+                }
+                
+                // Navigate back to main page
+                setTimeout(() => {
+                    window.location.href = 'https://shuffle.com';
+                }, 500);
+            }
+        }, 500);
+        
+        // Timeout after 10 seconds
+        setTimeout(() => {
+            clearInterval(checkForUsername);
+        }, 10000);
+    }
+
+    // ============================================
+    // GET AUTH TOKEN
+    // ============================================
+    
+    function getAuthToken() {
+        // Helper function to recursively search for JWT tokens
+        function findJWT(obj, depth = 0) {
+            if (depth > 5) return null; // Prevent infinite recursion
+            
+            // Direct JWT string
+            if (typeof obj === 'string' && obj.startsWith('eyJ') && obj.length > 100) {
+                return obj;
+            }
+            
+            // Try to parse string as JSON and search inside
+            if (typeof obj === 'string' && obj.includes('eyJ')) {
+                try {
+                    const parsed = JSON.parse(obj);
+                    const token = findJWT(parsed, depth + 1);
+                    if (token) return token;
+                } catch (e) {
+                    // Not valid JSON, continue
+                }
+            }
+            
+            // Search in objects
+            if (typeof obj === 'object' && obj !== null) {
+                for (const key in obj) {
+                    const result = findJWT(obj[key], depth + 1);
+                    if (result) return result;
+                }
+            }
+            
+            return null;
+        }
+        
+        // Check persist:root (Redux persist) - Shuffle stores auth here
+        try {
+            const persistRoot = localStorage.getItem('persist:root');
+            if (persistRoot) {
+                const token = findJWT(persistRoot);
+                if (token) {
+                    console.log('✅ Found auth token in persist:root');
+                    return token;
+                }
+            }
+        } catch (e) {
+            console.error('Error parsing persist:root:', e);
+        }
+        
+        // Check all localStorage keys
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            try {
+                const value = localStorage.getItem(key);
+                
+                // Direct JWT
+                if (value && value.startsWith('eyJ') && value.length > 100) {
+                    console.log('✅ Found JWT token in:', key);
+                    return value;
+                }
+                
+                // Parse as JSON and search recursively
+                if (value && value.includes('eyJ')) {
+                    const parsed = JSON.parse(value);
+                    const token = findJWT(parsed);
+                    if (token) {
+                        console.log('✅ Found JWT in parsed object:', key);
+                        return token;
+                    }
+                }
+            } catch (e) {
+                // Not JSON, continue
+            }
+        }
+        
+        // Try cookies
+        const cookies = document.cookie.split(';');
+        for (const cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (value && value.startsWith('eyJ') && value.length > 100) {
+                console.log('✅ Found JWT in cookie:', name);
+                return value;
+            }
+        }
+        
+        console.error('❌ No auth token found');
+        return null;
+    }
+
+    // ============================================
+    // GET GEETEST NONCE (REQUIRED TOKEN FOR REDEEM)
+    // ============================================
+    
+    async function getGeetestNonce(authToken) {
+        try {
+            const response = await fetch(GRAPHQL_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    operationName: 'GetGeetestNonce',
+                    query: 'mutation GetGeetestNonce { geetestNonce }',
+                    variables: {}
+                })
+            });
+            
+            const data = await response.json();
+            if (data?.data?.geetestNonce) {
+                console.log('✅ Got geetest nonce');
+                return data.data.geetestNonce;
+            }
+            
+            console.error('❌ Failed to get geetest nonce:', data);
+            return null;
+        } catch (error) {
+            console.error('❌ Error getting geetest nonce:', error);
+            return null;
+        }
+    }
+
+    // ============================================
+    // AUTO-REDEEM VIA TAB NAVIGATION + BUTTON CLICK
+    // ============================================
+    
+    function autoRedeemViaPage(codeSlug) {
+        // Check authentication first
+        if (!isAuthenticated) {
+            console.log(`🔒 Not authenticated - skipping code: ${codeSlug}`);
+            updateStatus('🔒 Connect to claim codes');
+            return;
+        }
+        
+        // Check if already processed
+        if (processedCodes[codeSlug]) {
+            console.log(`⏭️ Already processed: ${codeSlug}`);
+            return;
+        }
+        
+        console.log(`⚡ INSTANT REDEEM: ${codeSlug}`);
+        updateStatus(`⚡ ${codeSlug}`);
+        
+        // Mark as processed immediately to prevent duplicates
+        processedCodes[codeSlug] = Date.now();
+        GM_setValue('processedCodes', processedCodes);
+        
+        // Open redeem URL INSTANTLY in new tab
+        const redeemUrl = `https://shuffle.com/?md-code=${codeSlug}&modal=c`;
+        GM_openInTab(redeemUrl, { active: true, insert: true });
+        
+        GM_notification({
+            title: '⚡ CLAIMING NOW!',
+            text: codeSlug,
+            timeout: 2000
+        });
+    }
+    
+    // ============================================
+    // AUTO-CLICK REDEEM BUTTON (RUNS ON SHUFFLE.COM)
+    // ============================================
+    
+    function autoClickRedeemButton() {
+        // Only run if we're on shuffle.com with modal=c
+        if (!window.location.href.includes('shuffle.com') || !window.location.href.includes('modal=c')) {
+            return;
+        }
+        
+        // Extract code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const codeSlug = urlParams.get('md-code');
+        
+        if (!codeSlug) {
+            console.log('No md-code found in URL');
+            return;
+        }
+        
+        console.log(`🎯 Auto-redeem mode for: ${codeSlug}`);
+        
+        // Install fetch interceptor BEFORE clicking button
+        const originalFetch = window.fetch;
+        let intercepted = false;
+        
+        window.fetch = async function(...args) {
+            const [url, options] = args;
+            const response = await originalFetch.apply(this, args);
+            
+            if (!intercepted && url.includes('graphql') && options?.body?.includes('RedeemPromoCode')) {
+                intercepted = true;
+                window.fetch = originalFetch; // Restore original fetch
+                
+                const clonedResponse = response.clone();
+                const data = await clonedResponse.json();
+                
+                if (data?.data?.redeemPromotionCode) {
+                    const result = data.data.redeemPromotionCode;
+                    console.log('✅ Code claimed successfully!', result);
+                    
+                    GM_xmlhttpRequest({
+                        method: 'POST',
+                        url: `${API_URL}/api/code/claim`,
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': accessToken ? `Bearer ${accessToken}` : ''
+                        },
+                        data: JSON.stringify({ code: codeSlug, success: true })
+                    });
+                    
+                    GM_notification({
+                        title: '✅ Code Claimed!',
+                        text: `${codeSlug} - $${result.usdRedeemValue}`,
+                        timeout: 5000
+                    });
+                    
+                    // Close tab after 2 seconds
+                    setTimeout(() => window.close(), 2000);
+                } else if (data?.errors) {
+                    const errorMsg = data.errors[0]?.message || 'Unknown error';
+                    console.log('❌ Code rejected:', errorMsg);
+                    
+                    GM_xmlhttpRequest({
+                        method: 'POST',
+                        url: `${API_URL}/api/code/claim`,
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': accessToken ? `Bearer ${accessToken}` : ''
+                        },
+                        data: JSON.stringify({ 
+                            code: codeSlug, 
+                            success: false,
+                            reason: errorMsg
+                        })
+                    });
+                    
+                    GM_notification({
+                        title: '❌ Code Rejected',
+                        text: `${codeSlug}: ${errorMsg}`,
+                        timeout: 5000
+                    });
+                    
+                    // Close tab after 3 seconds
+                    setTimeout(() => window.close(), 3000);
+                }
+            }
+            
+            return response;
+        };
+        
+        // INSTANT button detection - check every 100ms for max 5 seconds
+        const clickAttempts = {
+            count: 0,
+            maxAttempts: 50 // 5 seconds max
+        };
+        
+        const checkForButton = setInterval(() => {
+            clickAttempts.count++;
+            
+            // Find Redeem button by specific classes
+            const redeemButton = Array.from(document.querySelectorAll('button')).find(btn => 
+                btn.className.includes('ButtonVariants_root__EFlHO') &&
+                btn.className.includes('ButtonVariants_primary__zlUoe') &&
+                btn.textContent.includes('Redeem')
+            );
+            
+            if (redeemButton && !redeemButton.disabled) {
+                clearInterval(checkForButton);
+                console.log('⚡ INSTANT CLICK!');
+                
+                // CLICK IMMEDIATELY - NO DELAY!
+                redeemButton.click();
+                
+                // Start monitoring for DOM alerts (error/success messages)
+                monitorDOMAlerts(codeSlug);
+                
+            } else if (clickAttempts.count >= clickAttempts.maxAttempts) {
+                clearInterval(checkForButton);
+                console.log('❌ Redeem button not found after 5 seconds');
+                window.fetch = originalFetch; // Restore fetch
+            }
+        }, 100); // Check every 100ms for speed
+    }
+
+    // ============================================
+    // MONITOR DOM ALERTS FOR ERROR/SUCCESS MESSAGES
+    // ============================================
+    
+    function monitorDOMAlerts(codeSlug) {
+        console.log('👀 Monitoring DOM alerts for success/error messages...');
+        
+        let alertCheckCount = 0;
+        const maxAlertChecks = 100; // 10 seconds max
+        
+        const alertChecker = setInterval(() => {
+            alertCheckCount++;
+            
+            // Look for alert messages in the DOM
+            const alertContainer = document.querySelector('.Alert_rightContainer__Sv0qq');
+            
+            if (alertContainer) {
+                const alertText = alertContainer.querySelector('.Alert_text__i7Zkk');
+                
+                if (alertText) {
+                    const message = alertText.textContent.trim();
+                    clearInterval(alertChecker);
+                    
+                    console.log('📢 DOM Alert detected:', message);
+                    
+                    // Check if it's an error or success
+                    const isError = message.toLowerCase().includes('error') || 
+                                  message.toLowerCase().includes('not') ||
+                                  message.toLowerCase().includes('requirement') ||
+                                  message.toLowerCase().includes('invalid') ||
+                                  message.toLowerCase().includes('expired') ||
+                                  message.toLowerCase().includes('already');
+                    
+                    if (isError) {
+                        console.log('❌ Error detected:', message);
+                        
+                        GM_xmlhttpRequest({
+                            method: 'POST',
+                            url: `${API_URL}/api/code/claim`,
+                            headers: { 'Content-Type': 'application/json' },
+                            data: JSON.stringify({ 
+                                code: codeSlug, 
+                                success: false,
+                                reason: message
+                            })
+                        });
+                        
+                        GM_notification({
+                            title: '❌ Code Failed',
+                            text: message,
+                            timeout: 5000
+                        });
+                        
+                        // Close tab after 2 seconds
+                        setTimeout(() => window.close(), 2000);
+                    } else {
+                        console.log('✅ Success detected:', message);
+                        
+                        GM_xmlhttpRequest({
+                            method: 'POST',
+                            url: `${API_URL}/api/code/claim`,
+                            headers: { 'Content-Type': 'application/json' },
+                            data: JSON.stringify({ 
+                                code: codeSlug, 
+                                success: true
+                            })
+                        });
+                        
+                        GM_notification({
+                            title: '✅ Code Claimed!',
+                            text: message,
+                            timeout: 5000
+                        });
+                        
+                        // Close tab after 2 seconds
+                        setTimeout(() => window.close(), 2000);
+                    }
+                }
+            }
+            
+            // Stop checking after 10 seconds
+            if (alertCheckCount >= maxAlertChecks) {
+                clearInterval(alertChecker);
+                console.log('⏰ Alert monitoring timed out (no alert appeared)');
+            }
+        }, 100); // Check every 100ms
+    }
+
+    // ============================================
+    // REDEEM CODE VIA GRAPHQL
+    // ============================================
+    
+    async function redeemCodeDirect(codeSlug, attempt = 1) {
+        updateStatus(`⚡ Redeeming ${codeSlug} (Attempt ${attempt}/3)...`);
+        
+        const authToken = getAuthToken();
+        if (!authToken) {
+            console.error('No auth token found!');
+            updateStatus('❌ Not logged in');
+            
+            // Mark as failed after 3 attempts
+            if (attempt >= 3) {
+                GM_xmlhttpRequest({
+                    method: 'POST',
+                    url: `${API_URL}/api/code/claim`,
+                    headers: { 'Content-Type': 'application/json' },
+                    data: JSON.stringify({ 
+                        code: codeSlug, 
+                        success: false,
+                        reason: 'Auth token not found (may need to refresh page after login)'
+                    })
+                });
+                retryAttempts[codeSlug] = 0;
+                GM_setValue('retryAttempts', retryAttempts);
+            } else {
+                // Retry after 2 seconds
+                retryAttempts[codeSlug] = attempt;
+                GM_setValue('retryAttempts', retryAttempts);
+                setTimeout(() => redeemCodeDirect(codeSlug, attempt + 1), 2000);
+            }
+            return;
+        }
+
+        console.log('Using auth token:', authToken.substring(0, 20) + '...');
+
+        // Get geetest nonce (required token field)
+        const nonce = await getGeetestNonce(authToken);
+        if (!nonce) {
+            console.error('Failed to get geetest nonce');
+            if (attempt >= 3) {
+                updateStatus('❌ Failed to get nonce');
+                GM_xmlhttpRequest({
+                    method: 'POST',
+                    url: `${API_URL}/api/code/claim`,
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': accessToken ? `Bearer ${accessToken}` : ''
+                    },
+                    data: JSON.stringify({ 
+                        code: codeSlug, 
+                        success: false,
+                        reason: 'Failed to get geetest nonce'
+                    })
+                });
+                retryAttempts[codeSlug] = 0;
+                GM_setValue('retryAttempts', retryAttempts);
+            } else {
+                retryAttempts[codeSlug] = attempt;
+                GM_setValue('retryAttempts', retryAttempts);
+                setTimeout(() => redeemCodeDirect(codeSlug, attempt + 1), 3000);
+            }
+            return;
+        }
+
+        const mutation = {
+            operationName: "RedeemPromoCode",
+            variables: {
+                data: {
+                    codeSlug: codeSlug,
+                    currency: "USDT",
+                    token: nonce
+                }
+            },
+            query: `mutation RedeemPromoCode($data: PromotionCodeInput!) {
+                redeemPromotionCode(data: $data) {
+                    id
+                    currency
+                    createdAt
+                    afterBalance
+                    usdRedeemValue
+                    __typename
+                }
+            }`
+        };
+
+        fetch(GRAPHQL_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(mutation)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('GraphQL Response:', data);
+            
+            if (data.errors) {
+                // FAILED - extract error message
+                const errorMsg = data.errors[0]?.message || 'Unknown error';
+                console.log(`❌ Code rejected (Attempt ${attempt}):`, errorMsg);
+                
+                if (attempt >= 3) {
+                    // Max attempts reached, mark as rejected
+                    updateStatus(`❌ Rejected: ${codeSlug}`);
+                    GM_xmlhttpRequest({
+                        method: 'POST',
+                        url: `${API_URL}/api/code/claim`,
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': accessToken ? `Bearer ${accessToken}` : ''
+                        },
+                        data: JSON.stringify({ 
+                            code: codeSlug, 
+                            success: false,
+                            reason: errorMsg
+                        })
+                    });
+                    retryAttempts[codeSlug] = 0;
+                    GM_setValue('retryAttempts', retryAttempts);
+                } else {
+                    // Retry after 3 seconds
+                    updateStatus(`⏳ Retrying ${codeSlug} in 3s...`);
+                    retryAttempts[codeSlug] = attempt;
+                    GM_setValue('retryAttempts', retryAttempts);
+                    setTimeout(() => redeemCodeDirect(codeSlug, attempt + 1), 3000);
+                }
+            } else if (data.data?.redeemPromotionCode) {
+                // SUCCESS
+                const result = data.data.redeemPromotionCode;
+                console.log('✅ Code claimed successfully!', result);
+                updateStatus(`✅ Claimed: ${codeSlug} - $${result.usdRedeemValue}`);
+                
+                GM_notification({
+                    title: '✅ Code Claimed!',
+                    text: `${codeSlug} - $${result.usdRedeemValue}`,
+                    timeout: 5000
+                });
+                
+                GM_xmlhttpRequest({
+                    method: 'POST',
+                    url: `${API_URL}/api/code/claim`,
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': accessToken ? `Bearer ${accessToken}` : ''
+                    },
+                    data: JSON.stringify({ 
+                        code: codeSlug, 
+                        success: true
+                    })
+                });
+                
+                retryAttempts[codeSlug] = 0;
+                GM_setValue('retryAttempts', retryAttempts);
+            }
+        })
+        .catch(error => {
+            console.error('Network error:', error);
+            
+            if (attempt >= 3) {
+                updateStatus(`❌ Network error`);
+                GM_xmlhttpRequest({
+                    method: 'POST',
+                    url: `${API_URL}/api/code/claim`,
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': accessToken ? `Bearer ${accessToken}` : ''
+                    },
+                    data: JSON.stringify({ 
+                        code: codeSlug, 
+                        success: false,
+                        reason: 'Network error: ' + error.message
+                    })
+                });
+                retryAttempts[codeSlug] = 0;
+                GM_setValue('retryAttempts', retryAttempts);
+            } else {
+                updateStatus(`⏳ Retrying ${codeSlug} in 3s...`);
+                retryAttempts[codeSlug] = attempt;
+                GM_setValue('retryAttempts', retryAttempts);
+                setTimeout(() => redeemCodeDirect(codeSlug, attempt + 1), 3000);
+            }
+        });
+    }
+
+    // ============================================
+    // FETCH AND PROCESS CODES (ONE TIME ONLY)
+    // ============================================
+    
+    function fetchAndProcessCodes() {
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: `${API_URL}/api/codes`,
+            headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
+            onload: function(response) {
+                try {
+                    const newCodes = JSON.parse(response.responseText);
+                    codes = newCodes;
+                    updateUI();
+                    
+                    // Find unclaimed codes that we haven't processed yet
+                    const unclaimedCodes = newCodes.filter(c => 
+                        !c.claimed && 
+                        !c.rejectionReason && 
+                        !processedCodes[c.code] // Not already opened
+                    );
+                    
+                    if (unclaimedCodes.length > 0) {
+                        // Process ONLY the first unclaimed code (prevents spam)
+                        const latestCode = unclaimedCodes[0];
+                        
+                        console.log(`⚡ NEW CODE INSTANT: ${latestCode.code}`);
+                        
+                        GM_notification({
+                            title: '⚡ NEW CODE!',
+                            text: latestCode.code,
+                            timeout: 2000
+                        });
+                        
+                        // INSTANT REDEEM - NO DELAY!
+                        autoRedeemViaPage(latestCode.code);
+                    } else {
+                        updateStatus('✅ All codes processed');
+                    }
+                } catch (e) {
+                    console.error('Failed to parse codes:', e);
+                }
+            },
+            onerror: function(error) {
+                updateStatus('❌ API Error');
+            }
+        });
+    }
+
+    // ============================================
+    // UI FUNCTIONS
+    // ============================================
+    
+    function updateCodesList() {
+        const container = document.getElementById('shuffle-codes-list');
+        if (!container) return;
+
+        if (codes.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:60px 20px; color:#666;">
+                    <h3 style="margin:0 0 10px;">No Codes Yet</h3>
+                    <p>Codes from Telegram will appear here</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = codes.map(code => {
+            let statusBadge = '';
+            let statusClass = '';
+            let rejectionHtml = '';
+            
+            if (code.claimed) {
+                statusBadge = '✅ CLAIMED';
+                statusClass = 'claimed';
+            } else if (code.rejectionReason) {
+                statusBadge = '❌ REJECTED';
+                statusClass = 'rejected';
+                rejectionHtml = `<div class="code-rejection-reason">🚫 ${code.rejectionReason}</div>`;
+            } else {
+                statusBadge = '⏳ PENDING';
+                statusClass = 'pending';
+            }
+            
+            return `
+            <div class="code-item ${statusClass}">
+                <div class="code-header">
+                    <div class="code-value">${code.code}</div>
+                    <div class="code-badge ${statusClass}">
+                        ${statusBadge}
+                    </div>
+                </div>
+                <div class="code-info-grid">
+                    <div>
+                        <div class="code-info-label">Amount</div>
+                        <div class="code-info-value">${code.amount}</div>
+                    </div>
+                    <div>
+                        <div class="code-info-label">Wager</div>
+                        <div class="code-info-value">${code.wager}</div>
+                    </div>
+                    <div>
+                        <div class="code-info-label">Deadline</div>
+                        <div class="code-info-value">${code.deadline}</div>
+                    </div>
+                    <div>
+                        <div class="code-info-label">Status</div>
+                        <div class="code-info-value">${code.claimed ? 'Claimed' : code.rejectionReason ? 'Rejected' : 'Ready'}</div>
+                    </div>
+                </div>
+                ${rejectionHtml}
+            </div>
+        `;
+        }).join('');
+    }
+
+    function updateUI() {
+        const header = document.getElementById('shuffle-header');
+        if (header) {
+            header.remove();
+            injectUI();
+        }
+    }
+
+    function updateStatus(text) {
+        const status = document.getElementById('shuffle-status');
+        if (status) status.textContent = text;
+    }
+
+    function togglePanel() {
+        const panel = document.getElementById('shuffle-panel');
+        
+        if (panel.style.display === 'none') {
+            panel.style.display = 'flex';
+            updateCodesList(); // Refresh the list when opening
+        } else {
+            panel.style.display = 'none';
+        }
+    }
+    
+    // ============================================
+    // AUTO-REFRESH DASHBOARD (ALWAYS RUNNING)
+    // ============================================
+    
+    function startAutoRefresh() {
+        // Poll dashboard API every 3 seconds (ALWAYS, not just when panel is open)
+        setInterval(() => {
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: `${API_URL}/api/codes`,
+                headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
+                onload: function(response) {
+                    try {
+                        const newCodes = JSON.parse(response.responseText);
+                        codes = newCodes;
+                        
+                        // Update UI if it exists
+                        updateCodesList();
+                        updateUI();
+                        
+                        // Check for new unclaimed codes to redeem
+                        const unclaimedCodes = newCodes.filter(c => 
+                            !c.claimed && 
+                            !c.rejectionReason && 
+                            !processedCodes[c.code]
+                        );
+                        
+                        if (unclaimedCodes.length > 0) {
+                            const latestCode = unclaimedCodes[0];
+                            console.log(`⚡ NEW CODE AUTO-DETECTED: ${latestCode.code}`);
+                            
+                            GM_notification({
+                                title: '⚡ NEW CODE!',
+                                text: latestCode.code,
+                                timeout: 2000
+                            });
+                            
+                            // INSTANT REDEEM!
+                            autoRedeemViaPage(latestCode.code);
+                        }
+                    } catch (e) {
+                        console.error('Auto-refresh error:', e);
+                    }
+                }
+            });
+        }, 3000); // Poll every 3 seconds
+        
+        console.log('🔄 Auto-refresh enabled - polling every 3 seconds');
+    }
+
+    // ============================================
+    // AUTO-CHECK: OPEN VIP TAB AND CHECK ELIGIBILITY
+    // ============================================
+    
+    function autoCheckEligibility() {
+        // Check if we already have username from localStorage (sent from VIP tab)
+        const storedUsername = localStorage.getItem('shuffle_extracted_username');
+        
+        if (storedUsername && storedUsername !== 'null') {
+            username = storedUsername;
+            console.log('✅ Username retrieved from VIP tab:', username);
+            
+            // Check eligibility immediately
+            checkSubscriptionStatus();
+        } else {
+            // No username yet - open VIP tab automatically
+            console.log('🚀 Auto-opening VIP tab to extract username...');
+            updateStatus('🔍 Checking account...');
+            
+            GM_openInTab('https://shuffle.com/vip-program', { active: false, insert: true });
+            
+            // Poll localStorage for username from VIP tab
+            let checkCount = 0;
+            const checkInterval = setInterval(() => {
+                const extractedUsername = localStorage.getItem('shuffle_extracted_username');
+                checkCount++;
+                
+                if (extractedUsername && extractedUsername !== 'null') {
+                    username = extractedUsername;
+                    console.log('✅ Username extracted:', username);
+                    clearInterval(checkInterval);
+                    
+                    // Check subscription status
+                    checkSubscriptionStatus();
+                } else if (checkCount > 20) {
+                    // Timeout after 10 seconds
+                    console.log('❌ VIP tab timeout');
+                    clearInterval(checkInterval);
+                    updateStatus('❌ Could not extract username');
+                }
+            }, 500);
+        }
+    }
+    
+    function checkSubscriptionStatus() {
+        if (!username) {
+            updateStatus('❌ No username found');
+            return;
+        }
+        
+        updateStatus(`👤 ${username} - Checking...`);
+        
+        // Check with backend
+        GM_xmlhttpRequest({
+            method: 'POST',
+            url: `${API_URL}/api/auth/connect`,
+            headers: { 'Content-Type': 'application/json' },
+            data: JSON.stringify({ username: username }),
+            onload: function(response) {
+                try {
+                    const data = JSON.parse(response.responseText);
+                    
+                    if (data.accessToken) {
+                        // ACTIVE SUBSCRIPTION!
+                        accessToken = data.accessToken;
+                        refreshToken = data.refreshToken;
+                        isAuthenticated = true;
+                        subscriptionExpiry = data.expiryAt;
+                        
+                        const expiryDate = subscriptionExpiry ? new Date(subscriptionExpiry).toLocaleDateString() : 'Lifetime';
+                        updateStatus(`✅ ${username} - Active until ${expiryDate}`);
+                        console.log('✅ SUBSCRIPTION ACTIVE:', expiryDate);
+                        
+                        // Start auto-claiming codes
+                        startAutoRefresh();
+                    } else {
+                        // NO SUBSCRIPTION
+                        updateStatus(`🔒 ${username} - Not subscribed`);
+                        console.log('🔒 No active subscription');
+                        isAuthenticated = false;
+                    }
+                } catch (e) {
+                    console.error('Status check failed:', e);
+                    updateStatus(`❌ ${username} - Check failed`);
+                }
+            },
+            onerror: function() {
+                updateStatus(`❌ ${username} - Connection error`);
+            }
+        });
+    }
+    
+    // ============================================
+    // INITIALIZE - INSTANT START (NO DELAY)
+    // ============================================
+    
+    // INSTANT INITIALIZATION - NO DELAY!
+    setTimeout(() => {
+        // Check if we're on VIP page - extract username and save to localStorage
+        const isVIPPage = window.location.pathname.includes('/vip-program');
+        
+        if (isVIPPage) {
+            // ON VIP PAGE - Extract username and save to localStorage
+            setTimeout(() => {
+                const usernameElement = document.querySelector('[class*="Username_username"]');
+                if (usernameElement) {
+                    const extractedUsername = usernameElement.textContent.trim().replace('@', '');
+                    localStorage.setItem('shuffle_extracted_username', extractedUsername);
+                    console.log('✅ VIP PAGE: Extracted username:', extractedUsername);
+                    
+                    // Close this tab automatically
+                    window.close();
+                } else {
+                    console.log('❌ VIP PAGE: Username element not found');
+                }
+            }, 1000);
+        } else {
+            // NOT VIP PAGE - Show header bar and auto-check eligibility
+            injectUI();
+            autoClickRedeemButton(); // Auto-click if we're on a redeem page
+            
+            // AUTO-CHECK ELIGIBILITY (opens VIP tab if needed)
+            autoCheckEligibility();
+        }
+        
+        console.log('⚡ Shuffle Code Claimer v3.1 - AUTO-CHECK ON PAGE LOAD');
+        console.log('🔍 Auto-check: Opens VIP tab → Extracts username → Checks eligibility');
+        console.log('⚡ Auto-refresh: Every 3 seconds (NO manual clicks needed)');
+        console.log('⚡ Auto-redeem: INSTANT tab + INSTANT click');
+        console.log('👤 Username: ' + username);
+        console.log('🔐 Authentication: ' + (isAuthenticated ? 'Active ✅' : 'Checking...'));
+    }, 200); // Minimal delay to ensure DOM is ready
+
+})();
