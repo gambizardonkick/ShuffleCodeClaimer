@@ -998,10 +998,22 @@ app.post('/api/telegram-message', async (req, res) => {
   }
 });
 
-const server = app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🚀 API server running on port ${PORT}`);
   console.log(`📡 Webhook URL: http://0.0.0.0:${PORT}/api/oxapay/webhook`);
   console.log(`📊 Admin Dashboard: http://0.0.0.0:${PORT}/admin.html`);
+  
+  // Start bots after server is ready (only when running directly)
+  if (require.main === module) {
+    setTimeout(async () => {
+      try {
+        await startBots();
+      } catch (error) {
+        console.error('💥 Bot startup error:', error);
+        console.error(error.stack);
+      }
+    }, 500);
+  }
 });
 
 async function startBots() {
@@ -1154,19 +1166,6 @@ async function startBots() {
     console.log('⚠️  Some bots skipped:', botErrors.join(', '));
   }
   console.log('='.repeat(60) + '\n');
-}
-
-if (require.main === module) {
-  server.on('listening', async () => {
-    setTimeout(async () => {
-      try {
-        await startBots();
-      } catch (error) {
-        console.error('💥 Bot startup error:', error);
-        console.error(error.stack);
-      }
-    }, 500);
-  });
 }
 
 module.exports = app;
