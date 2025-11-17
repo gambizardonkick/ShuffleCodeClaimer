@@ -1,7 +1,7 @@
 services:
-  # API Server (Main Web Service)
+  # All-in-One Service (API Server + Subscription Bot + Telegram Client)
   - type: web
-    name: shuffle-api-server
+    name: shuffle-all-in-one
     env: node
     region: oregon
     plan: free
@@ -35,57 +35,3 @@ services:
       - key: TELEGRAM_SESSION_STRING
         sync: false
     healthCheckPath: /health
-
-  # Subscription Bot (Background Worker)
-  - type: worker
-    name: shuffle-subscription-bot
-    env: node
-    region: oregon
-    plan: free
-    buildCommand: npm install
-    startCommand: npm run subscription-bot
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: FIREBASE_PROJECT_ID
-        sync: false
-      - key: FIREBASE_CLIENT_EMAIL
-        sync: false
-      - key: FIREBASE_PRIVATE_KEY
-        sync: false
-      - key: FIREBASE_DATABASE_URL
-        sync: false
-      - key: SUBSCRIPTION_BOT_TOKEN
-        sync: false
-      - key: OXAPAY_API_KEY
-        sync: false
-      - key: OXAPAY_MERCHANT_API_KEY
-        sync: false
-
-  # Telegram Client Bot (Background Worker)
-  - type: worker
-    name: shuffle-telegram-bot
-    env: node
-    region: oregon
-    plan: free
-    buildCommand: npm install
-    startCommand: npm run telegram-bot
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: FIREBASE_PROJECT_ID
-        sync: false
-      - key: FIREBASE_CLIENT_EMAIL
-        sync: false
-      - key: FIREBASE_PRIVATE_KEY
-        sync: false
-      - key: FIREBASE_DATABASE_URL
-        sync: false
-      - key: TELEGRAM_API_ID
-        sync: false
-      - key: TELEGRAM_API_HASH
-        sync: false
-      - key: TELEGRAM_SESSION_STRING
-        sync: false
-      - key: SUBSCRIPTION_BOT_TOKEN
-        sync: false
