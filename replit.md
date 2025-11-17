@@ -63,7 +63,7 @@ The system is built upon a three-component architecture designed for efficiency 
 *   **Authentication System:** A robust authentication flow (connect, verify, refresh, logout) using JWT access and rotating refresh tokens secures the Tampermonkey script's interaction with the backend, ensuring only subscribed users can claim codes. Includes comprehensive error handling with `onerror`, `ontimeout` (10-second timeout), and proper status checking to prevent "stuck on verifying" issues.
 *   **Multi-User Subscription Service:** A complete subscription system is integrated, supporting multiple Shuffle accounts per user, varied pricing tiers, and crypto payments via OxaPay with webhook handling. When payment is confirmed, the webhook automatically activates all shuffle accounts and sends a Telegram confirmation message to the user.
 *   **Payment Webhook Integration:** The OxaPay webhook handler automatically activates subscriptions, creates/updates shuffle accounts with proper expiry dates, and sends Telegram notifications to users when payment is confirmed. Uses a shared TelegramNotifier utility (shared/telegramNotifier.js) that makes raw HTTPS requests to Telegram Bot API without requiring Telegraf.
-*   **30-Minute Free Trial:** First-time users receive a 30-minute free trial (tracked via `trialClaimedAt` in database) to test the service before subscribing. The bot implements a strict eligibility check: after username submission, it verifies both the Telegram ID and all submitted usernames against the database. Only if BOTH are new will the user see the "Claim Free Trial" button. Otherwise, users proceed directly to paid plan selection. One-time only per Telegram ID with duplicate prevention at the callback level.
+*   **30-Minute Free Trial with Abuse Prevention:** First-time users receive a 30-minute free trial. The system uses a permanent `trialHistory` collection that tracks trial usage by both Telegram ID AND username forever. After trial expiry, expired accounts are auto-deleted from `shuffleAccounts`, allowing users to resubscribe without errors. However, trial eligibility checks the permanent `trialHistory`, preventing users from claiming multiple trials with different usernames or accounts. Trial abuse is prevented even after account deletion. See `docs/TRIAL_SYSTEM.md` for complete details.
 *   **Auto-Check On Page Load:** Upon visiting Shuffle.com, the script automatically performs a subscription check and retrieves the user's Shuffle username from a background VIP tab.
 *   **Tab-Based Auto-Redemption:** Codes are redeemed by opening active tabs that auto-click the redeem button and capture success/error messages, then close automatically using Tampermonkey's privileged `GM_closeTab()` API. The system includes specific detection for "This bonus code is not found" errors with case-insensitive matching to ensure proper rejection recording and tab closure.
 *   **Manual Code Claiming:** Users can click "⚡ Enter Code Manually" in the header to open a dedicated popup panel for entering promo codes. The system validates code format (4-20 alphanumeric characters), prevents duplicate processing, adds it to the dashboard with a "Manual Entry" label, and automatically opens a redemption tab. The panel is isolated from the 200ms polling refresh, ensuring smooth typing without flickering. Manual codes persist in browser storage alongside automatic codes.
@@ -88,7 +88,8 @@ The system is built upon a three-component architecture designed for efficiency 
   - `users`: User profiles with Telegram IDs and subscription status
   - `plans`: Subscription plans with pricing and duration
   - `subscriptions`: Active and pending subscriptions with payment tracking
-  - `shuffleAccounts`: User shuffle accounts with expiry dates
+  - `shuffleAccounts`: User shuffle accounts with expiry dates (auto-deleted after expiry)
+  - `trialHistory`: Permanent records of trial usage to prevent abuse (NEVER deleted)
   - `authTokens`: Authentication tokens for user sessions
   - `authSessions`: JWT refresh token sessions
   - `codes`: Promo codes with claim status
@@ -101,3 +102,21 @@ The system is built upon a three-component architecture designed for efficiency 
   - `subscription-bot-v2.js`: Updated bot to use Firebase
   - `scripts/seed-plans.js`: Updated seed script for Firebase
 - **Removed Files**: `server/db.js`, `server/db.ts`, `drizzle.config.ts`, `shared/schema.js`, `shared/schema.ts` (PostgreSQL/Drizzle ORM files)
+
+## November 17, 2025 - Trial Abuse Prevention & Auto-Cleanup System
+- **Implemented Trial History Tracking**: Added permanent `trialHistory` collection to prevent free trial abuse
+  - Tracks trial usage by both `telegramUserId` and `username` forever
+  - Prevents users from claiming multiple trials with different accounts/usernames
+  - Trial history persists even after account deletion
+- **Auto-Delete Expired Accounts**: Expired shuffle accounts are automatically removed from database
+  - Allows users to resubscribe after expiry without duplicate username errors
+  - Cleanup script: `scripts/cleanup-expired-accounts.js`
+  - Can be run manually or scheduled via cron job
+- **Updated Trial Eligibility Check**: Bot now checks permanent `trialHistory` instead of active accounts
+  - Users can resubscribe after expiry
+  - But cannot abuse the 30-minute free trial
+- **New Database Methods**:
+  - `createTrialHistory()`: Records permanent trial usage
+  - `hasUsedTrial()`: Checks if user/username has used trial
+  - `deleteExpiredShuffleAccounts()`: Removes expired accounts
+- **Documentation**: See `docs/TRIAL_SYSTEM.md` for complete technical details and setup instructions
