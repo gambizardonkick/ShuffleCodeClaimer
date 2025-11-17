@@ -275,18 +275,20 @@ bot.on('text', async (ctx) => {
     userSessions.set(telegramUserId, session);
     
     // ===== ELIGIBILITY CHECK =====
-    // Check 1: Does this Telegram ID exist?
-    const existingUser = await firebaseDB.findUserByTelegramId(telegramUserId);
+    // Check if this Telegram ID has used the trial before
+    const hasTrialHistory = await firebaseDB.hasUsedTrial(telegramUserId);
     
-    // Check 2: Do ANY of these usernames exist?
-    let existingAccounts = [];
+    // Check if ANY of the usernames have been used for a trial before
+    let usernameHasTrialHistory = false;
     for (const username of usernames) {
-      const accounts = await firebaseDB.findShuffleAccountsByUsername(username);
-      existingAccounts.push(...accounts);
+      if (await firebaseDB.hasUsedTrial(null, username)) {
+        usernameHasTrialHistory = true;
+        break;
+      }
     }
     
-    // If EITHER exists -> NOT eligible for free trial
-    if (existingUser || existingAccounts.length > 0) {
+    // If trial was already used (by telegramId OR username) -> NOT eligible
+    if (hasTrialHistory || usernameHasTrialHistory) {
       // Show pricing plans directly
       const availablePlans = await firebaseDB.getAllPlans();
       const keyboard = availablePlans.map(plan => {
@@ -304,7 +306,7 @@ bot.on('text', async (ctx) => {
       return;
     }
     
-    // If BOTH are new -> Eligible for free trial!
+    // If trial has NEVER been used -> Eligible for free trial!
     await ctx.reply(
       `✅ You have given ${usernames.length} username(s):\n${usernames.join(', ')}\n\n` +
       `🎁 *You're eligible for a 30-MINUTE FREE TRIAL!*\n\n` +
@@ -341,19 +343,27 @@ bot.action('claim_free_trial', async (ctx) => {
     const usernames = session.usernames;
     
     // DOUBLE CHECK - Prevent duplicate trial grants
-    const existingUser = await firebaseDB.findUserByTelegramId(telegramUserId);
+    const hasTrialHistory = await firebaseDB.hasUsedTrial(telegramUserId);
     
-    if (existingUser) {
-      await ctx.reply('❌ You already have an account. Free trial can only be claimed once.');
+    if (hasTrialHistory) {
+      await ctx.reply('❌ You have already used your free trial. Please purchase a subscription.');
       return;
     }
     
-    // Create user with trial marked as claimed
-    const user = await firebaseDB.createUser({
-      telegramUserId,
-      status: 'active',
-      trialClaimedAt: new Date().toISOString()
-    });
+    // Find or create user
+    let user = await firebaseDB.findUserByTelegramId(telegramUserId);
+    if (!user) {
+      user = await firebaseDB.createUser({
+        telegramUserId,
+        status: 'active',
+        trialClaimedAt: new Date().toISOString()
+      });
+    } else {
+      await firebaseDB.updateUser(user.id, {
+        trialClaimedAt: new Date().toISOString(),
+        status: 'active'
+      });
+    }
     
     // Grant free trial
     await grantFreeTrial(ctx, user, usernames);
@@ -439,13 +449,19 @@ async function grantFreeTrial(ctx, user, usernames) {
     // Calculate 30-minute expiry (stored in UTC)
     const expiryAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
     
-    // Create shuffle accounts with 30-minute expiry
+    // Create shuffle accounts with 30-minute expiry AND record trial history
     for (const username of usernames) {
       await firebaseDB.createShuffleAccount({
         userId: user.id,
         username,
         status: 'active',
         expiryAt: expiryAt.toISOString()
+      });
+      
+      // Record trial history (permanent record to prevent abuse)
+      await firebaseDB.createTrialHistory({
+        telegramUserId,
+        username
       });
     }
     
