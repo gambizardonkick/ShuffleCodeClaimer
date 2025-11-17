@@ -567,19 +567,21 @@ async function notifyPaymentConfirmed(telegramUserId, messageId, subscriptionDet
 // Export for webhook handler
 module.exports = { bot, userSessions, notifyPaymentConfirmed };
 
-// Launch bot only if SUBSCRIPTION_BOT_TOKEN is set
-if (process.env.SUBSCRIPTION_BOT_TOKEN) {
-  bot.launch().then(() => {
-    console.log('🤖 Subscription bot started!');
-  }).catch((error) => {
-    console.error('Failed to start bot:', error);
-    process.exit(1);
-  });
+// Launch bot only if SUBSCRIPTION_BOT_TOKEN is set AND not being imported by combined-worker
+if (require.main === module) {
+  if (process.env.SUBSCRIPTION_BOT_TOKEN) {
+    bot.launch().then(() => {
+      console.log('🤖 Subscription bot started!');
+    }).catch((error) => {
+      console.error('Failed to start bot:', error);
+      process.exit(1);
+    });
 
-  // Enable graceful stop
-  process.once('SIGINT', () => bot.stop('SIGINT'));
-  process.once('SIGTERM', () => bot.stop('SIGTERM'));
-} else {
-  console.warn('⚠️  SUBSCRIPTION_BOT_TOKEN not set - subscription bot not started');
-  console.log('Please create a second bot via @BotFather and add the token to secrets');
+    // Enable graceful stop
+    process.once('SIGINT', () => bot.stop('SIGINT'));
+    process.once('SIGTERM', () => bot.stop('SIGTERM'));
+  } else {
+    console.warn('⚠️  SUBSCRIPTION_BOT_TOKEN not set - subscription bot not started');
+    console.log('Please create a second bot via @BotFather and add the token to secrets');
+  }
 }
