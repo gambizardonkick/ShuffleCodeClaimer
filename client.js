@@ -1,4 +1,4 @@
-const { TelegramClient } = require("telegram");
+const { TelegramClient, Button } = require("telegram");
 const { StringSession } = require("telegram/sessions");
 const { NewMessage } = require("telegram/events");
 const input = require("input");
@@ -6,7 +6,7 @@ const input = require("input");
 // Get credentials from environment variables
 const apiId = parseInt(process.env.TELEGRAM_API_ID);
 const apiHash = process.env.TELEGRAM_API_HASH;
-let sessionString = process.env.TELEGRAM_SESSION || "";
+let sessionString = process.env.TELEGRAM_SESSION || process.env.TELEGRAM_SESSION_STRING || "";
 
 // Validate session string - if it's not a valid base64 string or empty, reset it
 if (sessionString && sessionString.length > 0) {
@@ -121,21 +121,43 @@ async function main() {
         
         if (isSourceGroup) {
           const groupName = chat.title || chat.username || 'Unknown';
+          const messageText = message.message || '';
           console.log(`📩 New message from: ${groupName}`);
+          console.log(`📝 Message content: "${messageText}"`);
           
           try {
-            // Send message to channel (no forward label)
-            const sendOptions = {
-              message: message.message || '',
-            };
-            
-            // Only include file if media exists
-            if (message.media) {
-              sendOptions.file = message.media;
+            // Try sending with button first
+            try {
+              const sendOptions = {
+                message: messageText,
+                buttons: [
+                  [Button.url('🤖 Buy Automatic Code Claimer Bot', 'https://t.me/ShuffleSubscriptionBot')]
+                ]
+              };
+              
+              // Only include file if media exists
+              if (message.media) {
+                sendOptions.file = message.media;
+              }
+              
+              await client.sendMessage(targetChannel, sendOptions);
+              console.log(`✓ Sent to ${TARGET_CHANNEL} (with button)`);
+            } catch (buttonError) {
+              console.log(`⚠️ Button failed (${buttonError.message}), sending without button...`);
+              
+              // Fallback: send without button but add promotional text
+              const promotionalText = messageText + '\n\n🤖 Buy Automatic Code Claimer Bot: @ShuffleSubscriptionBot';
+              const fallbackOptions = {
+                message: promotionalText
+              };
+              
+              if (message.media) {
+                fallbackOptions.file = message.media;
+              }
+              
+              await client.sendMessage(targetChannel, fallbackOptions);
+              console.log(`✓ Sent to ${TARGET_CHANNEL} (text-only with promo)`);
             }
-            
-            await client.sendMessage(targetChannel, sendOptions);
-            console.log(`✓ Sent to ${TARGET_CHANNEL}`);
             
             // Send to dashboard API for code detection
             try {
