@@ -77,58 +77,177 @@ bot.action('my_subscriptions', async (ctx) => {
     const user = await firebaseDB.findUserByTelegramId(telegramUserId);
     
     if (!user) {
-      await ctx.reply('❌ No account found. Use /start to create one.');
+      await ctx.reply(
+        '❌ *No subscriptions found*\n\n' +
+        'You haven\'t subscribed any accounts yet.\n' +
+        'Click "Add New Accounts" to get started!',
+        { 
+          parse_mode: 'Markdown',
+          ...Markup.inlineKeyboard([
+            [Markup.button.callback('➕ Add New Accounts', 'add_accounts')]
+          ])
+        }
+      );
       return;
     }
     
     const accounts = await firebaseDB.findShuffleAccountsByUserId(user.id);
     
     if (accounts.length === 0) {
-      await ctx.reply('❌ No active accounts. Click "Add New Accounts" to subscribe.');
+      await ctx.reply(
+        '❌ *No accounts found*\n\n' +
+        'You haven\'t added any Shuffle accounts yet.\n' +
+        'Click "Add New Accounts" to subscribe!',
+        { 
+          parse_mode: 'Markdown',
+          ...Markup.inlineKeyboard([
+            [Markup.button.callback('➕ Add New Accounts', 'add_accounts')]
+          ])
+        }
+      );
       return;
     }
     
-    let message = '📊 *Your Active Accounts:*\n\n';
-    accounts.forEach((acc, i) => {
-      const status = acc.status === 'active' ? '✅' : '⏸';
-      let expiryText = 'N/A';
-      
-      if (acc.expiryAt) {
+    // Separate active and expired accounts
+    const now = new Date();
+    const activeAccounts = [];
+    const expiredAccounts = [];
+    
+    accounts.forEach(acc => {
+      if (!acc.expiryAt) {
+        activeAccounts.push(acc);
+      } else {
         const expiryDate = new Date(acc.expiryAt);
-        const now = new Date();
-        const diffMs = expiryDate - now;
-        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-        
-        if (diffMs < 0) {
-          expiryText = '❌ Expired';
-        } else if (diffMs < 60 * 60 * 1000) {
-          // Less than 1 hour - show minutes
-          const minutes = Math.ceil(diffMs / (1000 * 60));
-          expiryText = `${minutes} min${minutes !== 1 ? 's' : ''}`;
-        } else if (diffMs < 24 * 60 * 60 * 1000) {
-          // Less than 1 day - show hours
-          const hours = Math.ceil(diffMs / (1000 * 60 * 60));
-          expiryText = `${hours} hour${hours !== 1 ? 's' : ''}`;
-        } else if (diffDays <= 7) {
-          // Less than 7 days - show days
-          expiryText = `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+        if (expiryDate > now) {
+          activeAccounts.push(acc);
         } else {
-          // Show date in user's local time (formatted as UTC with explicit label)
-          const dateStr = expiryDate.toISOString().split('T')[0]; // YYYY-MM-DD
-          const timeStr = expiryDate.toISOString().split('T')[1].split('.')[0]; // HH:MM:SS
-          expiryText = `${dateStr} ${timeStr} UTC`;
+          expiredAccounts.push(acc);
         }
       }
-      
-      message += `${i + 1}. ${status} ${acc.username} - ${expiryText}\n`;
     });
     
-    await ctx.reply(message, { parse_mode: 'Markdown' });
+    let message = `📊 *Your Subscriptions*\n`;
+    message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+    
+    // Show active accounts
+    if (activeAccounts.length > 0) {
+      message += `✅ *Active Accounts (${activeAccounts.length}):*\n\n`;
+      activeAccounts.forEach((acc, i) => {
+        let expiryText = 'Lifetime';
+        
+        if (acc.expiryAt) {
+          const expiryDate = new Date(acc.expiryAt);
+          const diffMs = expiryDate - now;
+          const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+          
+          if (diffMs < 60 * 60 * 1000) {
+            const minutes = Math.ceil(diffMs / (1000 * 60));
+            expiryText = `⚠️ ${minutes} min left`;
+          } else if (diffMs < 24 * 60 * 60 * 1000) {
+            const hours = Math.ceil(diffMs / (1000 * 60 * 60));
+            expiryText = `⚠️ ${hours}h left`;
+          } else if (diffDays <= 3) {
+            expiryText = `⚠️ ${diffDays}d left`;
+          } else if (diffDays <= 7) {
+            expiryText = `${diffDays} days left`;
+          } else {
+            const dateStr = expiryDate.toISOString().split('T')[0];
+            expiryText = `until ${dateStr}`;
+          }
+        }
+        
+        message += `  ${i + 1}. *${acc.username}* - ${expiryText}\n`;
+      });
+      message += '\n';
+    }
+    
+    // Show expired accounts
+    if (expiredAccounts.length > 0) {
+      message += `❌ *Expired Accounts (${expiredAccounts.length}):*\n\n`;
+      expiredAccounts.forEach((acc, i) => {
+        const expiryDate = new Date(acc.expiryAt);
+        const dateStr = expiryDate.toISOString().split('T')[0];
+        message += `  ${i + 1}. *${acc.username}* - expired ${dateStr}\n`;
+      });
+      message += '\n';
+    }
+    
+    // Summary
+    message += `━━━━━━━━━━━━━━━━━━━━\n`;
+    message += `📌 Total: ${accounts.length} account(s)\n`;
+    message += `🟢 Active: ${activeAccounts.length} | 🔴 Expired: ${expiredAccounts.length}`;
+    
+    // Build action buttons
+    const buttons = [];
+    if (expiredAccounts.length > 0) {
+      // Store expired usernames for renewal
+      const expiredUsernames = expiredAccounts.map(a => a.username).join(',');
+      buttons.push([Markup.button.callback('🔄 Renew Expired Accounts', `renew_expired_${expiredUsernames}`)]);
+    }
+    buttons.push([Markup.button.callback('➕ Add New Accounts', 'add_accounts')]);
+    buttons.push([Markup.button.callback('🔙 Back to Menu', 'back_to_menu')]);
+    
+    await ctx.reply(message, { 
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard(buttons)
+    });
     
   } catch (error) {
     console.error('My subscriptions error:', error);
-    await ctx.reply('❌ Error fetching subscriptions.');
+    await ctx.reply('❌ Error fetching subscriptions. Please try again.');
   }
+});
+
+// Handle "Renew Expired Accounts" button
+bot.action(/^renew_expired_(.+)$/, async (ctx) => {
+  await ctx.answerCbQuery();
+  const telegramUserId = ctx.from.id.toString();
+  const expiredUsernames = ctx.match[1].split(',');
+  
+  // Store in session and proceed to plan selection
+  userSessions.set(telegramUserId, { 
+    step: 'renewing',
+    usernames: expiredUsernames,
+    accountCount: expiredUsernames.length
+  });
+  
+  await ctx.reply(
+    `🔄 *Renew ${expiredUsernames.length} Expired Account(s):*\n\n` +
+    expiredUsernames.map((u, i) => `  ${i + 1}. ${u}`).join('\n') + '\n\n' +
+    `Select a subscription plan:`,
+    { parse_mode: 'Markdown' }
+  );
+  
+  try {
+    const availablePlans = await firebaseDB.getAllPlans();
+    const keyboard = availablePlans.map(plan => {
+      let displayPrice;
+      if (plan.name.includes('Month') && !plan.name.includes('3') && !plan.name.includes('6')) {
+        displayPrice = `$${MONTHLY_PRICE * expiredUsernames.length}`;
+      } else {
+        displayPrice = `$${(plan.priceCents / 100) * expiredUsernames.length}`;
+      }
+      return [Markup.button.callback(`${plan.name} - ${displayPrice}`, `plan_${plan.id}_${expiredUsernames.length}`)];
+    });
+    
+    await ctx.reply('Choose your plan:', Markup.inlineKeyboard(keyboard));
+  } catch (error) {
+    console.error('Renew plans error:', error);
+    await ctx.reply('❌ Error loading plans.');
+  }
+});
+
+// Handle "Back to Menu" button
+bot.action('back_to_menu', async (ctx) => {
+  await ctx.answerCbQuery();
+  
+  await ctx.reply(
+    'Please make a selection:',
+    Markup.inlineKeyboard([
+      [Markup.button.callback('➕ Add New Accounts', 'add_accounts')],
+      [Markup.button.callback('📊 My Subscriptions', 'my_subscriptions')],
+    ])
+  );
 });
 
 // Handle plan selection callbacks
