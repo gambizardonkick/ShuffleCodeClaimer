@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shuffle Code Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-box .label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .codes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .code-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: slideIn 0.3s ease;
+            position: relative;
+        }
+
+        .code-card.claimed {
+            background: rgba(200, 255, 200, 0.95);
+            border: 2px solid #48bb78;
+        }
+
+        .claimed-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #48bb78;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .code-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.75em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            font-size: 0.95em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .code-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .code-card.new {
+            border: 3px solid #00ff00;
+            animation: pulse 1s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+            }
+            50% {
+                box-shadow: 0 10px 30px rgba(0, 255, 0, 0.6);
+            }
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .code-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
+
+        .code-time {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .code-message {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 0.9em;
+            color: #444;
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-copy {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .btn-copy.copied {
+            background: #2d7a4f;
+        }
+
+        .empty-state {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 60px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .empty-state h2 {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        .clear-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 25px;
+            background: #f56565;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            background: #e53e3e;
+            transform: scale(1.05);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #48bb78;
+            margin-right: 8px;
+            animation: blink 2s ease infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎰 Shuffle Code Dashboard</h1>
+            <p style="color: #666; margin-top: 10px;">
+                <span class="status-indicator"></span>
+                Monitoring shufflecodesdrops channel
+            </p>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="number" id="totalCodes">0</div>
+                    <div class="label">Total Codes</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="todayCodes">0</div>
+                    <div class="label">Today</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="lastUpdate">Never</div>
+                    <div class="label">Last Update</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="codesContainer" class="codes-grid"></div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <h2>No Codes Yet</h2>
+            <p>Waiting for codes from the Telegram channel...</p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #ccc;">
+                Make sure the Tampermonkey script is installed and you have the Telegram channel open.
+            </p>
+        </div>
+
+        <button class="clear-btn" onclick="clearAllCodes()">🗑️ Clear All</button>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'shuffleCodes';
+
+        // Load codes from localStorage
+        function loadCodes() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        // Save codes to localStorage
+        function saveCodes(codes) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(codes));
+        }
+
+        // Add a new code
+        function addCode(code, message) {
+            const codes = loadCodes();
+            const newCode = {
+                id: Date.now(),
+                code: code,
+                message: message,
+                timestamp: new Date().toISOString(),
+                redeemed: false
+            };
+            codes.unshift(newCode);
+            saveCodes(codes);
+            renderCodes();
+        }
+
+        // Format time ago
+        function timeAgo(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diff = Math.floor((now - time) / 1000);
+
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
+            return Math.floor(diff / 86400) + ' days ago';
+        }
+
+        // Render codes
+        function renderCodes() {
+            const codes = loadCodes();
+            const container = document.getElementById('codesContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (codes.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                updateStats(0, 0, 'Never');
+                return;
+            }
+
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            container.innerHTML = codes.map((item, index) => `
+                <div class="code-card ${index === 0 ? 'new' : ''} ${item.claimed ? 'claimed' : ''}" data-id="${item.id}">
+                    ${item.claimed ? '<div class="claimed-badge">✅ Claimed</div>' : ''}
+                    <div class="code-header">
+                        <div class="code-value">${item.code}</div>
+                        <div class="code-time">${timeAgo(item.timestamp)}</div>
+                    </div>
+                    <div class="code-info">
+                        <div class="info-item">
+                            <div class="info-label">Amount</div>
+                            <div class="info-value">${item.amount || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Wager Req.</div>
+                            <div class="info-value">${item.wager || 'Unknown'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Deadline</div>
+                            <div class="info-value">${item.deadline || 'Limited'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">${item.claimed ? '✅ Claimed' : '⏳ Pending'}</div>
+                        </div>
+                    </div>
+                    <div class="code-message">${item.message.substring(0, 150)}${item.message.length > 150 ? '...' : ''}</div>
+                    <div class="code-actions">
+                        <button class="btn btn-primary" onclick="redeemCode('${item.code}')" ${item.claimed ? 'disabled style="opacity:0.5"' : ''}>
+                            🎰 ${item.claimed ? 'Already Claimed' : 'Redeem Now'}
+                        </button>
+                        <button class="btn btn-copy" onclick="copyCode('${item.code}', this)">
+                            📋 Copy
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update stats
+            const today = new Date().toDateString();
+            const todayCount = codes.filter(c => 
+                new Date(c.timestamp).toDateString() === today
+            ).length;
+            
+            const lastTime = codes.length > 0 ? timeAgo(codes[0].timestamp) : 'Never';
+            updateStats(codes.length, todayCount, lastTime);
+
+            // Remove "new" class after 3 seconds
+            setTimeout(() => {
+                document.querySelectorAll('.code-card.new').forEach(card => {
+                    card.classList.remove('new');
+                });
+            }, 3000);
+        }
+
+        // Update statistics
+        function updateStats(total, today, lastUpdate) {
+            document.getElementById('totalCodes').textContent = total;
+            document.getElementById('todayCodes').textContent = today;
+            document.getElementById('lastUpdate').textContent = lastUpdate;
+        }
+
+        // Redeem code
+        function redeemCode(code) {
+            const url = `https://shuffle.com/?md-code=${code}&modal=c`;
+            window.open(url, '_blank');
+        }
+
+        // Copy code
+        function copyCode(code, button) {
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Clear all codes
+        function clearAllCodes() {
+            if (confirm('Are you sure you want to clear all codes?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                renderCodes();
+            }
+        }
+
+        // Fetch codes from server
+        async function fetchCodes() {
+            try {
+                const response = await fetch('/api/codes');
+                const serverCodes = await response.json();
+                
+                if (serverCodes.length > 0) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(serverCodes));
+                    renderCodes();
+                }
+            } catch (error) {
+                console.log('Server not available, using local storage');
+                renderCodes();
+            }
+        }
+
+        // Listen for messages from Tampermonkey
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'NEW_CODE') {
+                addCode(event.data.code, event.data.message);
+            }
+        });
+
+        // Initial render
+        fetchCodes();
+
+        // Refresh from server every 5 seconds
+        setInterval(fetchCodes, 5000);
+
+        // Update time display every 30 seconds
+        setInterval(renderCodes, 30000);
+    </script>
+</body>
+</html>

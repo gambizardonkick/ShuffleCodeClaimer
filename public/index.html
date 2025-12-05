@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shuffle Code Claimer — #1 Auto Code Claimer for Shuffle.com</title>
+  <meta name="description" content="Shuffle Code Claimer is the fastest automatic promo code claimer for Shuffle.com. Get instant code detection, auto-redemption, Telegram alerts & 24/7 uptime. Start with a free 30-minute trial!" />
+  <meta name="keywords" content="shuffle code claimer, shuffle promo codes, shuffle.com codes, shuffle bonus codes, auto claimer, shuffle bot, shuffle code bot, shuffle rewards" />
+  <meta name="author" content="Shuffle Code Claimer" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://shufflecodeclaimer.com/" />
+  <link rel="icon" href="https://i.postimg.cc/D0vSfm2H/unnamed-3.jpg" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://shufflecodeclaimer.com/" />
+  <meta property="og:title" content="Shuffle Code Claimer — #1 Auto Code Claimer for Shuffle.com" />
+  <meta property="og:description" content="The fastest automatic promo code claimer for Shuffle.com. Instant detection, auto-redemption, Telegram alerts & free 30-minute trial!" />
+  <meta property="og:image" content="https://i.postimg.cc/D0vSfm2H/unnamed-3.jpg" />
+  <meta property="og:site_name" content="Shuffle Code Claimer" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://shufflecodeclaimer.com/" />
+  <meta name="twitter:title" content="Shuffle Code Claimer — #1 Auto Code Claimer for Shuffle.com" />
+  <meta name="twitter:description" content="The fastest automatic promo code claimer for Shuffle.com. Instant detection, auto-redemption & Telegram alerts!" />
+  <meta name="twitter:image" content="https://i.postimg.cc/D0vSfm2H/unnamed-3.jpg" />
+  
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Shuffle Code Claimer",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Web Browser",
+    "description": "Automatic promo code claimer for Shuffle.com with instant detection, auto-redemption, and Telegram notifications.",
+    "url": "https://shufflecodeclaimer.com/",
+    "image": "https://i.postimg.cc/D0vSfm2H/unnamed-3.jpg",
+    "author": {
+      "@type": "Organization",
+      "name": "Shuffle Code Claimer"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "10.00",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "priceValidUntil": "2026-12-31"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "150",
+      "bestRating": "5",
+      "worstRating": "1"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Shuffle Code Claimer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Shuffle Code Claimer is an automatic promo code detection and redemption tool for Shuffle.com. It monitors Telegram groups for new codes and instantly redeems them on your account."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a free trial?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! We offer a free 30-minute trial for all new users. No payment required to try it out."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How fast is the code claiming?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Our system detects and claims codes in under 1 second. We use real-time monitoring to ensure you never miss a code."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is it safe to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Shuffle Code Claimer runs as a browser extension and never stores your Shuffle password. It only automates the code redemption process."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- 1. Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 2. Google Font (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- 3. Bootstrap Icons (for the icons) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- 4. Custom Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#7b4bff',
+              light: '#9b77ff',
+            },
+            dark: {
+              bg: '#07080c',
+              card: '#0d0f14',
+              border: 'rgba(255, 255, 255, 0.06)',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'brand-glow': '0 4px 40px rgba(123, 75, 255, 0.35)',
+            'brand-glow-lg': '0 8px 60px rgba(123, 75, 255, 0.45)',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- 5. Custom Styles for animations and scrollbar -->
+  <style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d0f14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #7b4bff;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9b77ff;
+    }
+  </style>
+</head>
+
+<body class="bg-dark-bg text-gray-200 font-sans">
+
+  <!-- NAVBAR -->
+  <nav class="sticky top-0 z-50 w-full backdrop-blur-lg bg-dark-bg/70 border-b border-dark-border transition-all duration-300">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center h-16">
+        
+        <!-- Logo -->
+        <a class="flex items-center gap-2" href="#home">
+          <img src="https://i.postimg.cc/D0vSfm2H/unnamed-3.jpg" width="34" height="34" class="rounded-lg" alt="Shuffle Code Claimer Logo">
+          <span class="text-lg font-semibold text-white">Shuffle Code Claimer</span>
+        </a>
+
+        <!-- Mobile Menu Button -->
+        <button id="nav-btn" class="md:hidden text-gray-300 hover:text-white" aria-label="Toggle menu">
+          <i class="bi bi-list text-3xl"></i>
+        </button>
+
+        <!-- Desktop Nav -->
+        <div class="hidden md:flex items-center gap-6">
+          <a href="#how" class="text-gray-400 hover:text-white transition-colors">How it works</a>
+          <a href="#guide" class="text-gray-400 hover:text-white transition-colors">Setup Guide</a>
+          <a href="#channels" class="text-gray-400 hover:text-white transition-colors">Channels</a>
+          <a href="#bots" class="text-gray-400 hover:text-white transition-colors">Bots</a>
+          <a href="#pricing" class="text-gray-400 hover:text-white transition-colors">Pricing</a>
+          <a href="#faq" class="text-gray-400 hover:text-white transition-colors">FAQ</a>
+          <a href="#buy" class="ml-4 px-4 py-2 text-sm font-medium text-brand-light border-2 border-brand/50 rounded-lg hover:bg-brand/10 transition-colors">
+            Get Access
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Nav Menu (hidden by default) -->
+    <div id="nav-menu" class="hidden md:hidden absolute top-16 left-0 w-full bg-dark-card border-b border-dark-border shadow-lg">
+      <div class="flex flex-col p-4 space-y-3">
+        <a href="#how" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">How it works</a>
+        <a href="#guide" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">Setup Guide</a>
+        <a href="#channels" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">Channels</a>
+        <a href="#bots" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">Bots</a>
+        <a href="#pricing" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">Pricing</a>
+        <a href="#faq" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">FAQ</a>
+        <a href="#buy" class="block w-full px-4 py-3 text-center font-medium text-white bg-gradient-to-r from-brand to-brand-light rounded-lg hover:opacity-90 transition-opacity">
+          Get Access
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header id="home" class="relative pt-32 pb-24 text-center overflow-hidden">
+    <!-- Background Glow -->
+    <div class="absolute inset-0 -z-10 overflow-hidden">
+      <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[40rem] h-[40rem] bg-brand/30 rounded-full blur-[150px] opacity-30"></div>
+    </div>
+
+    <div class="container mx-auto px-4 section-animate" data-delay="100ms">
+      <div class="max-w-4xl mx-auto">
+        
+        <!-- Pills -->
+        <div class="flex justify-center gap-2 mb-6 flex-wrap">
+          <span class="py-1.5 px-4 bg-dark-card border border-dark-border rounded-full text-xs font-medium text-gray-300">WebSocket Delivery</span>
+          <span class="py-1.5 px-4 bg-dark-card border border-dark-border rounded-full text-xs font-medium text-gray-300">Instant Execution</span>
+          <span class="py-1.5 px-4 bg-dark-card border border-dark-border rounded-full text-xs font-medium text-gray-300">Smart Reload Logic</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tighter mb-5">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-light to-brand shadow-brand-glow">Shuffle Code Claimer</span>
+          <span class="text-white"> — Auto Promo Bot</span>
+        </h1>
+
+        <!-- Subheadline -->
+        <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mt-6">
+          A fully‑optimized, ultra‑fast userscript that claims Shuffle.gg codes the moment they're released.
+          Zero clicking. Zero delay. Maximum results.
+        </p>
+
+        <!-- CTAs -->
+        <div class="mt-10 flex flex-wrap justify-center gap-4">
+          <a href="#buy" class="inline-flex items-center justify-center px-8 py-3.5 text-lg font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow transition-transform hover:scale-105">
+            <i class="bi bi-lightning-charge-fill mr-2"></i>
+            Start Now
+          </a>
+          <a href="#how" class="inline-flex items-center justify-center px-8 py-3.5 text-lg font-semibold text-gray-300 bg-dark-card border border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            <i class="bi bi-play-circle mr-2"></i>
+            How it Works
+          </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex flex-wrap justify-center gap-3 mt-10 text-center">
+          <div class="py-1.5 px-4 bg-dark-card/50 border border-dark-border rounded-full text-sm text-gray-400"><strong>10–50ms</strong> avg latency</div>
+          <div class="py-1.5 px-4 bg-dark-card/50 border border-dark-border rounded-full text-sm text-gray-400"><strong>99.9%</strong> uptime</div>
+          <div class="py-1.5 px-4 bg-dark-card/50 border border-dark-border rounded-full text-sm text-gray-400"><strong>Auto</strong> reload execution</div>
+        </div>
+        
+      </div>
+    </div>
+  </header>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="py-24 section-animate" data-delay="200ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">How It Works</h2>
+        <p class="text-lg text-gray-400 mt-3">3 steps • Zero effort • Maximum speed</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Card 1 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <i class="bi bi-broadcast"></i>
+          </div>
+          <h3 class="text-2xl font-semibold text-white mb-3">Real‑Time Monitoring</h3>
+          <p class="text-gray-400">Our backend tracks Shuffle code channels 24/7 and pushes drops instantly to your browser.</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <i class="bi bi-lightning-fill"></i>
+          </div>
+          <h3 class="text-2xl font-semibold text-white mb-3">Instant Auto‑Claim</h3>
+          <p class="text-gray-400">Your userscript executes the claim in milliseconds with human‑like timing randomness.</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <i class="bi bi-arrow-repeat"></i>
+          </div>
+          <h3 class="text-2xl font-semibold text-white mb-3">Smart Reload Logic</h3>
+          <p class="text-gray-400">Reload eligibility is detected automatically and executed safely before code claiming.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETUP GUIDE -->
+  <section id="guide" class="py-24 bg-dark-card/30 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">Setup Guide</h2>
+        <p class="text-lg text-gray-400 mt-3">Get up and running in minutes</p>
+      </div>
+
+      <div class="max-w-4xl mx-auto space-y-8">
+        <!-- Quick Setup -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl">
+              <i class="bi bi-lightning-fill"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-semibold text-white">Quick Setup</h3>
+              <p class="text-gray-400">The fast track to get started.</p>
+            </div>
+          </div>
+          <ol class="list-decimal list-inside space-y-3 text-gray-300 pl-2">
+            <li>Install <strong>Tampermonkey</strong> from Chrome/Edge/Firefox stores.</li>
+            <li>Enable <strong>Developer Mode</strong> if your browser requires it.</li>
+            <li>Install the script: <a href="https://openuserjs.org/install/ShuffleCodeClaimer/Shuffle_Code_Claimer.user.js" class="text-brand-light hover:underline">Shuffle_Code_Claimer.user.js</a></li>
+            <li>Restart your browser.</li>
+            <li>Open <a href="https://shuffle.com" target="_blank" class="text-brand-light hover:underline">Shuffle.com</a> and click <strong>Connect</strong>.</li>
+          </ol>
+        </div>
+
+        <!-- Detailed Instructions -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl">
+              <i class="bi bi-list-check"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-semibold text-white">Detailed Instructions</h3>
+              <p class="text-gray-400">Step-by-step installation.</p>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <div>
+              <h4 class="text-xl font-semibold text-white mb-3">1. Install Tampermonkey</h4>
+              <p class="text-gray-400 mb-4">Choose your browser:</p>
+              <div class="grid sm:grid-cols-3 gap-4">
+                <a class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" target="_blank">Chrome</a>
+                <a class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd" target="_blank">Edge</a>
+                <a class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/" target="_blank">Firefox</a>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-xl font-semibold text-white mb-3">2. Enable Developer Mode</h4>
+              <ul class="list-disc list-inside space-y-2 text-gray-400 pl-2">
+                <li>Chrome: go to <code class="bg-dark-bg px-2 py-1 rounded-md text-sm text-gray-300">chrome://extensions</code></li>
+                <li>Edge: go to <code class="bg-dark-bg px-2 py-1 rounded-md text-sm text-gray-300">edge://extensions</code></li>
+                <li>Enable <strong>Allow User Scripts</strong> in Tampermonkey settings.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 class="text-xl font-semibold text-white mb-3">3. Install the Shuffle Code Claimer Script</h4>
+              <p class="text-gray-400 mb-4">Click the script link below to install:</p>
+              <a href="https://openuserjs.org/install/ShuffleCodeClaimer/Shuffle_Code_Claimer.user.js" class="inline-flex items-center justify-center px-6 py-3 font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow transition-transform hover:scale-105">
+                <i class="bi bi-filetype-js mr-2 text-xl"></i>Install Userscript
+              </a>
+            </div>
+            
+            <div>
+              <h4 class="text-xl font-semibold text-white mb-3">4. Restart Browser & Open Shuffle.com</h4>
+              <p class="text-gray-400">Once the site loads, the script panel appears at the top with a <strong>Connect</strong> button.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHANNELS -->
+  <section id="channels" class="py-24 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">Community Channels</h2>
+        <p class="text-lg text-gray-400 mt-3">Stay updated with official & community drops</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Channel 1 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col">
+          <h3 class="text-2xl font-semibold text-white mb-3 flex justify-between items-center">
+            Official Drops <i class="bi bi-telegram text-sky-400"></i>
+          </h3>
+          <p class="text-gray-400 mt-2 mb-4 flex-grow">Official Shuffle.gg code releases and promotions.</p>
+          <a href="https://t.me/shufflecodesdrops" target="_blank" class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors">
+            @ShuffleCodesDrops
+          </a>
+        </div>
+
+        <!-- Channel 2 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col">
+          <h3 class="text-2xl font-semibold text-white mb-3 flex justify-between items-center">
+            Community Codes <i class="bi bi-telegram text-sky-400"></i>
+          </h3>
+          <p class="text-gray-400 mt-2 mb-4 flex-grow">Shared drops, user‑submitted finds, hidden rewards.</p>
+          <a href="https://t.me/shufflecommunitycodes" target="_blank" class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors">
+            @ShuffleCommunityCodes
+          </a>
+        </div>
+
+        <!-- Channel 3 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col">
+          <h3 class="text-2xl font-semibold text-white mb-3 flex justify-between items-center">
+            Announcements <i class="bi bi-megaphone-fill text-yellow-400"></i>
+          </h3>
+          <p class="text-gray-400 mt-2 mb-4 flex-grow">Updates, maintenance, upgrades, and patch notes.</p>
+          <a href="https://t.me/shuffleclaimernews" target="_blank" class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors">
+            @ShuffleClaimerNews
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTS -->
+  <section id="bots" class="py-24 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">Telegram Bots</h2>
+        <p class="text-lg text-gray-400 mt-3">Subscriptions • Activation • Support</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <!-- Bot 1 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 flex flex-col">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-2xl font-semibold text-white">Subscription Bot</h3>
+            <span class="py-1 px-3 bg-brand/10 text-brand-light text-xs font-medium rounded-full">Global</span>
+          </div>
+          <ul class="space-y-3 my-4 text-gray-300 flex-grow">
+            <li class="flex items-center gap-3"><i class="bi bi-check2-circle text-brand text-xl"></i> Purchase or renew plans</li>
+            <li class="flex items-center gap-3"><i class="bi bi-check2-circle text-brand text-xl"></i> Auto activation</li>
+            <li class="flex items-center gap-3"><i class="bi bi-check2-circle text-brand text-xl"></i> Crypto payments</li>
+          </ul>
+          <a class="w-full py-3.5 text-center text-lg font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow transition-transform hover:scale-105" href="https://t.me/ShuffleSubscriptionBot" target="_blank">
+            <i class="bi bi-telegram mr-2"></i>@ShuffleSubscriptionBot
+          </a>
+        </div>
+
+        <!-- Bot 2 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 flex flex-col">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-2xl font-semibold text-white">Support</h3>
+            <span class="py-1 px-3 bg-gray-700 text-gray-300 text-xs font-medium rounded-full">Help</span>
+          </div>
+          <ul class="space-y-3 my-4 text-gray-300 flex-grow">
+            <li class="flex items-center gap-3"><i class="bi bi-check-circle text-gray-500 text-xl"></i> Troubleshooting</li>
+            <li class="flex items-center gap-3"><i class="bi bi-check-circle text-gray-500 text-xl"></i> Bindings / issues</li>
+            <li class="flex items-center gap-3"><i class="bi bi-check-circle text-gray-500 text-xl"></i> Manual assistance</li>
+          </ul>
+          <a class="w-full py-3.5 text-center text-lg font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white" href="https://t.me/ThaGoofy" target="_blank">
+            <i class="bi bi-telegram mr-2"></i>@ThaGoofy
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="py-24 bg-dark-card/30 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">Pricing</h2>
+        <p class="text-lg text-gray-400 mt-3">Flexible plans • Full feature access</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+        
+        <!-- Plan 1: 1 Day -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <h3 class="text-xl font-semibold text-white">1 Day</h3>
+          <p class="text-xs text-brand-light mb-2 h-8">Perfect for Friday Stream</p>
+          <div class="text-4xl font-extrabold text-white my-3">$10</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 24-hour access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Full features</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            Choose 1 Day
+          </a>
+        </div>
+
+        <!-- Plan 2: 1 Week -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <h3 class="text-xl font-semibold text-white">1 Week</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$22</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 7-day access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Telegram support</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            Choose 1 Week
+          </a>
+        </div>
+
+        <!-- Plan 3: 1 Month -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <h3 class="text-xl font-semibold text-white">1 Month</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$55</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 30-day access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Priority support</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            Choose 1 Month
+          </a>
+        </div>
+
+        <!-- Plan 4: 3 Months -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <h3 class="text-xl font-semibold text-white">3 Months</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$100</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 90-day access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Best value</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            Choose 3 Months
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Second Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-6">
+        
+        <!-- Plan 5: 6 Months -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <h3 class="text-xl font-semibold text-white">6 Months</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$160</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 180-day access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> VIP support</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            Choose 6 Months
+          </a>
+        </div>
+
+        <!-- Plan 6: 1 Year -->
+        <div class="bg-dark-card border-2 border-brand rounded-2xl p-6 flex flex-col relative shadow-brand-glow-lg transition-all duration-300 hover:-translate-y-2">
+          <span class="absolute -top-3 left-1/2 -translate-x-1/2 py-1 px-4 bg-brand text-white text-xs font-bold rounded-full">POPULAR</span>
+          <h3 class="text-xl font-semibold text-white">1 Year</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$250</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 365-day access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Premium support</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow transition-transform hover:scale-105">
+            Choose 1 Year
+          </a>
+        </div>
+
+        <!-- Plan 7: Lifetime -->
+        <div class="bg-dark-card border-2 border-brand-light rounded-2xl p-6 flex flex-col relative shadow-brand-glow transition-all duration-300 hover:-translate-y-2">
+          <span class="absolute -top-3 left-1/2 -translate-x-1/2 py-1 px-4 bg-gradient-to-r from-brand to-brand-light text-white text-xs font-bold rounded-full">BEST VALUE</span>
+          <h3 class="text-xl font-semibold text-white">Lifetime</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$400</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Unlimited access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Lifetime updates</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow transition-transform hover:scale-105">
+            Choose Lifetime
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-24 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
+        <p class="text-lg text-gray-400 mt-3">Everything you need to know</p>
+      </div>
+
+      <div class="max-w-3xl mx-auto space-y-4">
+        <!-- FAQ Item 1 -->
+        <details class="bg-dark-card border border-dark-border rounded-2xl p-6 transition-all duration-300 hover:border-brand/50">
+          <summary class="text-lg font-semibold text-white cursor-pointer">How fast does it claim codes?</summary>
+          <p class="text-gray-400 mt-3">The bot claims codes within 10-50ms of detection, giving you a significant advantage over manual claiming.</p>
+        </details>
+
+        <!-- FAQ Item 2 -->
+        <details class="bg-dark-card border border-dark-border rounded-2xl p-6 transition-all duration-300 hover:border-brand/50">
+          <summary class="text-lg font-semibold text-white cursor-pointer">Is it safe to use?</summary>
+          <p class="text-gray-400 mt-3">Yes, the script operates within Tampermonkey's sandbox and doesn't access sensitive data. It only automates code claiming actions you could do manually.</p>
+        </details>
+
+        <!-- FAQ Item 3 -->
+        <details class="bg-dark-card border border-dark-border rounded-2xl p-6 transition-all duration-300 hover:border-brand/50">
+          <summary class="text-lg font-semibold text-white cursor-pointer">What payment methods do you accept?</summary>
+          <p class="text-gray-400 mt-3">We accept cryptocurrency payments through OxaPay for secure, anonymous transactions.</p>
+        </details>
+
+        <!-- FAQ Item 4 -->
+        <details class="bg-dark-card border border-dark-border rounded-2xl p-6 transition-all duration-300 hover:border-brand/50">
+          <summary class="text-lg font-semibold text-white cursor-pointer">Can I use it on multiple accounts?</summary>
+          <p class="text-gray-400 mt-3">Each subscription is tied to one Shuffle account. Contact support for multi-account plans.</p>
+        </details>
+
+        <!-- FAQ Item 5 -->
+        <details class="bg-dark-card border border-dark-border rounded-2xl p-6 transition-all duration-300 hover:border-brand/50">
+          <summary class="text-lg font-semibold text-white cursor-pointer">What if I need help?</summary>
+          <p class="text-gray-400 mt-3">Contact our support bot @ThaGoofy on Telegram for assistance with setup and troubleshooting.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUY SECTION -->
+  <section id="buy" class="py-24 bg-dark-card/30 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4 text-center">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6">Ready to Start Claiming?</h2>
+        <p class="text-lg text-gray-400 mb-10">Join hundreds of users who never miss a code drop</p>
+        
+        <a href="https://t.me/ShuffleSubscriptionBot" target="_blank" class="inline-flex items-center justify-center px-10 py-4 text-xl font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow-lg transition-transform hover:scale-105">
+          <i class="bi bi-telegram mr-3 text-2xl"></i>
+          Get Started Now
+        </a>
+
+        <p class="text-sm text-gray-500 mt-6">Instant activation • 24/7 support • Secure payments</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-dark-border">
+    <div class="container mx-auto px-4 text-center text-gray-500">
+      <p>&copy; 2025 Shuffle Code Claimer. All rights reserved.</p>
+      <p class="mt-2 text-sm">Not affiliated with Shuffle.com</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Mobile menu toggle
+    document.getElementById('nav-btn').addEventListener('click', function() {
+      const menu = document.getElementById('nav-menu');
+      menu.classList.toggle('hidden');
+    });
+
+    // Smooth scroll animations
+    const animatedElements = document.querySelectorAll('.section-animate');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    animatedElements.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+      observer.observe(el);
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,251 @@
+           GM_xmlhttpRequest({
+                    method: 'POST',
+                    url: `${API_URL}/api/code/claim`,
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': accessToken ? `Bearer ${accessToken}` : ''
+                    },
+                    data: JSON.stringify({ 
+                        code: codeSlug, 
+                        success: false,
+                        reason: 'Network error: ' + error.message
+                    })
+                });
+                retryAttempts[codeSlug] = 0;
+                GM_setValue('retryAttempts', retryAttempts);
+            } else {
+                updateStatus(`⏳ Retrying ${codeSlug} in 3s...`);
+                retryAttempts[codeSlug] = attempt;
+                GM_setValue('retryAttempts', retryAttempts);
+                setTimeout(() => redeemCodeDirect(codeSlug, attempt + 1), 3000);
+            }
+        });
+    }
+
+    // ============================================
+    // FETCH AND PROCESS CODES (ONE TIME ONLY)
+    // ============================================
+    
+    function fetchAndProcessCodes() {
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: `${API_URL}/api/codes`,
+            headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
+            onload: function(response) {
+                try {
+                    const newCodes = JSON.parse(response.responseText);
+                    codes = newCodes;
+                    updateUI();
+                    
+                    // Find unclaimed codes that we haven't processed yet
+                    const unclaimedCodes = newCodes.filter(c => 
+                        !c.claimed && 
+                        !c.rejectionReason && 
+                        !processedCodes[c.code] // Not already opened
+                    );
+                    
+                    if (unclaimedCodes.length > 0) {
+                        // Process ONLY the first unclaimed code (prevents spam)
+                        const latestCode = unclaimedCodes[0];
+                        
+                        console.log(`⚡ NEW CODE INSTANT: ${latestCode.code}`);
+                        
+                        GM_notification({
+                            title: '⚡ NEW CODE!',
+                            text: latestCode.code,
+                            timeout: 2000
+                        });
+                        
+                        // INSTANT REDEEM - NO DELAY!
+                        autoRedeemViaPage(latestCode.code);
+                    } else {
+                        updateStatus('✅ All codes processed');
+                    }
+                } catch (e) {
+                    console.error('Failed to parse codes:', e);
+                }
+            },
+            onerror: function(error) {
+                updateStatus('❌ API Error');
+            }
+        });
+    }
+
+    // ============================================
+    // UI FUNCTIONS
+    // ============================================
+    
+    function updateCodesList() {
+        const container = document.getElementById('shuffle-codes-list');
+        if (!container) return;
+
+        if (codes.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:60px 20px; color:#666;">
+                    <h3 style="margin:0 0 10px;">No Codes Yet</h3>
+                    <p>Codes from Telegram will appear here</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = codes.map(code => {
+            let statusBadge = '';
+            let statusClass = '';
+            let rejectionHtml = '';
+            
+            if (code.claimed) {
+                statusBadge = '✅ CLAIMED';
+                statusClass = 'claimed';
+            } else if (code.rejectionReason) {
+                statusBadge = '❌ REJECTED';
+                statusClass = 'rejected';
+                rejectionHtml = `<div class="code-rejection-reason">🚫 ${code.rejectionReason}</div>`;
+            } else {
+                statusBadge = '⏳ PENDING';
+                statusClass = 'pending';
+            }
+            
+            return `
+            <div class="code-item ${statusClass}">
+                <div class="code-header">
+                    <div class="code-value">${code.code}</div>
+                    <div class="code-badge ${statusClass}">
+                        ${statusBadge}
+                    </div>
+                </div>
+                <div class="code-info-grid">
+                    <div>
+                        <div class="code-info-label">Amount</div>
+                        <div class="code-info-value">${code.amount}</div>
+                    </div>
+                    <div>
+                        <div class="code-info-label">Wager</div>
+                        <div class="code-info-value">${code.wager}</div>
+                    </div>
+                    <div>
+                        <div class="code-info-label">Deadline</div>
+                        <div class="code-info-value">${code.deadline}</div>
+                    </div>
+                    <div>
+                        <div class="code-info-label">Status</div>
+                        <div class="code-info-value">${code.claimed ? 'Claimed' : code.rejectionReason ? 'Rejected' : 'Ready'}</div>
+                    </div>
+                </div>
+                ${rejectionHtml}
+            </div>
+        `;
+        }).join('');
+    }
+
+    function updateUI() {
+        const header = document.getElementById('shuffle-header');
+        if (header) {
+            header.remove();
+            injectUI();
+        }
+    }
+
+    function updateStatus(text) {
+        const status = document.getElementById('shuffle-status');
+        if (status) status.textContent = text;
+    }
+
+    function togglePanel() {
+        const panel = document.getElementById('shuffle-panel');
+        
+        if (panel.style.display === 'none') {
+            panel.style.display = 'flex';
+            updateCodesList(); // Refresh the list when opening
+        } else {
+            panel.style.display = 'none';
+        }
+    }
+    
+    // ============================================
+    // AUTO-REFRESH DASHBOARD (ALWAYS RUNNING)
+    // ============================================
+    
+    function startAutoRefresh() {
+        // Poll dashboard API every 3 seconds (ALWAYS, not just when panel is open)
+        setInterval(() => {
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: `${API_URL}/api/codes`,
+                headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
+                onload: function(response) {
+                    try {
+                        const newCodes = JSON.parse(response.responseText);
+                        codes = newCodes;
+                        
+                        // Update UI if it exists
+                        updateCodesList();
+                        updateUI();
+                        
+                        // Check for new unclaimed codes to redeem
+                        const unclaimedCodes = newCodes.filter(c => 
+                            !c.claimed && 
+                            !c.rejectionReason && 
+                            !processedCodes[c.code]
+                        );
+                        
+                        if (unclaimedCodes.length > 0) {
+                            const latestCode = unclaimedCodes[0];
+                            console.log(`⚡ NEW CODE AUTO-DETECTED: ${latestCode.code}`);
+                            
+                            GM_notification({
+                                title: '⚡ NEW CODE!',
+                                text: latestCode.code,
+                                timeout: 2000
+                            });
+                            
+                            // INSTANT REDEEM!
+                            autoRedeemViaPage(latestCode.code);
+                        }
+                    } catch (e) {
+                        console.error('Auto-refresh error:', e);
+                    }
+                }
+            });
+        }, 3000); // Poll every 3 seconds
+        
+        console.log('🔄 Auto-refresh enabled - polling every 3 seconds');
+    }
+
+    // ============================================
+    // INITIALIZE - INSTANT START (NO DELAY)
+    // ============================================
+    
+    // INSTANT INITIALIZATION - NO DELAY!
+    setTimeout(() => {
+        // Check if we're on VIP page - extract username and connect
+        const isVIPPage = window.location.pathname.includes('/vip-program');
+        
+        if (isVIPPage) {
+            // On VIP page - extract username and authenticate
+            extractUsernameAndConnect();
+        } else {
+            // Not on VIP page - show header bar immediately
+            injectUI();
+            autoClickRedeemButton(); // Auto-click if we're on a redeem page
+            
+            // Extract username if we don't have it yet
+            if (!username && !window.location.href.includes('modal=c')) {
+                extractUsername();
+            }
+            
+            // Start auto-refresh loop (polls every 3 seconds FOREVER)
+            startAutoRefresh();
+        }
+        
+        console.log('⚡ Shuffle Code Claimer v3.0 - FULL AUTO MODE with Authentication');
+        console.log('⚡ Auto-refresh: Every 3 seconds (NO manual clicks needed)');
+        console.log('⚡ Auto-redeem: INSTANT tab + INSTANT click');
+        console.log('⚡ DOM parsing: Reads error/success alerts');
+        console.log('⚡ No spam: Each code redeemed ONCE only');
+        console.log('📜 Scroll controls: Up/Down buttons in dashboard corner');
+        console.log('👤 Username: ' + username);
+        console.log('🔐 Authentication: ' + (isAuthenticated ? 'Active ✅' : 'Not connected 🔒'));
+    }, 200); // Minimal delay to ensure DOM is ready
+
+})();

@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shuffle Code Claimer - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f7fafc;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #2d3748;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status.active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status.expired {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .stat-card.online {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+        }
+
+        .stat-card.turbo {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .stat-card.turbo:hover {
+            transform: scale(1.02);
+        }
+
+        .stat-card.turbo.active {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
+            50% { box-shadow: 0 0 20px 10px rgba(255,107,107,0.3); }
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .delete-btn {
+            background: #fc8181;
+            padding: 6px 12px;
+            font-size: 12px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .delete-btn:hover {
+            background: #f56565;
+        }
+
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .online-dot.online {
+            background: #00ff88;
+            box-shadow: 0 0 8px #00ff88;
+            animation: blink 2s infinite;
+        }
+
+        .online-dot.offline {
+            background: #666;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .turbo-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .turbo-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo">🎰</div>
+                <div>
+                    <h1>Shuffle Code Claimer Admin <span id="roleIndicator" style="font-size: 16px; font-weight: normal;"></span></h1>
+                    <div class="subtitle">Manage users, subscriptions, and codes</div>
+                </div>
+            </div>
+            <div>
+                <label>Admin API Key</label>
+                <input type="password" id="adminKey" placeholder="Enter admin API key" style="width: 300px;" />
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card full-admin-only">
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card online full-admin-only">
+                <div class="stat-value" id="onlineUsers">0</div>
+                <div class="stat-label">🟢 Online Now</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalCodes">0</div>
+                <div class="stat-label">Codes in Cache</div>
+            </div>
+            <div class="stat-card turbo full-admin-only" id="turboCard" onclick="toggleSuperTurbo()">
+                <div class="stat-value turbo-toggle">
+                    <span id="turboStatus">OFF</span>
+                    <span class="turbo-status" id="pollInterval">200ms</span>
+                </div>
+                <div class="stat-label">🚀 Super Turbo Mode</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card full-admin-only">
+                <div class="card-title">➕ Add User Manually</div>
+                <div class="success" id="addUserSuccess"></div>
+                <div class="error" id="addUserError"></div>
+                <form id="addUserForm">
+                    <div class="form-group">
+                        <label>Telegram User ID</label>
+                        <input type="text" id="telegramUserId" placeholder="123456789" required />
+                        <div class="help-text">Get this from the user's Telegram profile</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Shuffle Username</label>
+                        <input type="text" id="username" placeholder="johndoe123" required />
+                        <div class="help-text">The username from shuffle.com/vip-program</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Expiry Date (UTC Time)</label>
+                        <input type="datetime-local" id="expiryAt" required />
+                        <div class="help-text">When the subscription should expire (stored as UTC)</div>
+                    </div>
+                    <button type="submit">Add User</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📝 Add Code Manually</div>
+                <div class="success" id="addCodeSuccess"></div>
+                <div class="error" id="addCodeError"></div>
+                <form id="addCodeForm">
+                    <div class="form-group">
+                        <label>Code</label>
+                        <input type="text" id="code" placeholder="ABC123XYZ" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Value</label>
+                        <input type="text" id="amount" placeholder="$1.50" />
+                        <div class="help-text">Examples: $1.50, $2.00, $15.00</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Limit</label>
+                        <input type="text" id="limit" placeholder="First 2000" />
+                        <div class="help-text">Examples: First 2000, First 300, First 1000</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Wager Req.</label>
+                        <input type="text" id="wager" placeholder="$4,500" />
+                        <div class="help-text">Examples: $4,500, $6,000, $50,000</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Timeline</label>
+                        <input type="text" id="timeline" placeholder="7 days" />
+                        <div class="help-text">Examples: 24h, 3 days, 7 days</div>
+                    </div>
+                    <button type="submit">Add Code</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card full-admin-only">
+            <div class="card-title">👥 All Users</div>
+            <button onclick="loadUsers()" style="width: auto; margin-bottom: 15px;">🔄 Refresh</button>
+            <div class="table-container">
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>ID</th>
+                            <th>Telegram ID</th>
+                            <th>Username</th>
+                            <th>Sub Status</th>
+                            <th>Expires</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersBody">
+                        <tr><td colspan="8" style="text-align: center; padding: 40px;">Enter admin key and click Refresh</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🎁 All Codes</div>
+            <button onclick="loadCodes()" style="width: auto; margin-bottom: 15px;">🔄 Refresh</button>
+            <div class="table-container">
+                <table id="codesTable">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Value</th>
+                            <th>Limit</th>
+                            <th>Wager Req.</th>
+                            <th>Timeline</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="codesBody">
+                        <tr><td colspan="8" style="text-align: center; padding: 40px;">No codes yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        let superTurboEnabled = false;
+        let adminPermissions = null;
+
+        // Set default expiry to 1 month from now
+        const defaultExpiry = new Date();
+        defaultExpiry.setMonth(defaultExpiry.getMonth() + 1);
+        document.getElementById('expiryAt').value = defaultExpiry.toISOString().slice(0, 16);
+        
+        // Verify admin key and update UI based on permissions
+        async function verifyAdminKey() {
+            const adminKey = document.getElementById('adminKey').value;
+            if (!adminKey) {
+                adminPermissions = null;
+                updateUIForRole();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/verify`, {
+                    headers: { 'x-admin-key': adminKey }
+                });
+                
+                if (response.ok) {
+                    adminPermissions = await response.json();
+                    console.log('Admin role:', adminPermissions.role);
+                    updateUIForRole();
+                    
+                    // Load data based on permissions
+                    if (adminPermissions.canAccessUsers) {
+                        loadUsers();
+                    }
+                    loadCodes();
+                } else {
+                    adminPermissions = null;
+                    updateUIForRole();
+                    alert('Invalid admin key');
+                }
+            } catch (err) {
+                console.error('Error verifying admin key:', err);
+                adminPermissions = null;
+                updateUIForRole();
+            }
+        }
+        
+        // Show/hide sections based on admin role
+        function updateUIForRole() {
+            const fullAccessSections = document.querySelectorAll('.full-admin-only');
+            const roleIndicator = document.getElementById('roleIndicator');
+            
+            if (!adminPermissions) {
+                fullAccessSections.forEach(el => el.style.display = 'none');
+                if (roleIndicator) roleIndicator.textContent = '';
+                return;
+            }
+            
+            // Update role indicator
+            if (roleIndicator) {
+                roleIndicator.textContent = adminPermissions.role === 'full' ? '(Full Access)' : '(Codes Only)';
+                roleIndicator.style.color = adminPermissions.role === 'full' ? '#00c853' : '#ff9800';
+            }
+            
+            // Show/hide full-admin-only sections
+            fullAccessSections.forEach(el => {
+                el.style.display = adminPermissions.role === 'full' ? '' : 'none';
+            });
+        }
+        
+        // Handle admin key input
+        document.getElementById('adminKey').addEventListener('change', verifyAdminKey);
+        document.getElementById('adminKey').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                verifyAdminKey();
+            }
+        });
+
+        // Toggle Super Turbo Mode
+        async function toggleSuperTurbo() {
+            const adminKey = document.getElementById('adminKey').value;
+            if (!adminKey) {
+                alert('Please enter admin API key first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/super-turbo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-key': adminKey
+                    },
+                    body: JSON.stringify({ enabled: !superTurboEnabled })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    superTurboEnabled = result.superTurbo;
+                    updateTurboUI();
+                } else {
+                    alert(result.error || 'Failed to toggle turbo mode');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        function updateTurboUI() {
+            const turboCard = document.getElementById('turboCard');
+            const turboStatus = document.getElementById('turboStatus');
+            const pollInterval = document.getElementById('pollInterval');
+
+            if (superTurboEnabled) {
+                turboCard.classList.add('active');
+                turboStatus.textContent = 'ON';
+                pollInterval.textContent = '50ms';
+            } else {
+                turboCard.classList.remove('active');
+                turboStatus.textContent = 'OFF';
+                pollInterval.textContent = '200ms';
+            }
+        }
+
+        // Add user
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const adminKey = document.getElementById('adminKey').value;
+            if (!adminKey) {
+                showError('addUserError', 'Please enter admin API key');
+                return;
+            }
+
+            const data = {
+                telegramUserId: document.getElementById('telegramUserId').value,
+                username: document.getElementById('username').value.toLowerCase(),
+                expiryAt: document.getElementById('expiryAt').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/shuffle-accounts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-key': adminKey
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showSuccess('addUserSuccess', `User ${data.username} added successfully!`);
+                    document.getElementById('addUserForm').reset();
+                    document.getElementById('expiryAt').value = defaultExpiry.toISOString().slice(0, 16);
+                    loadUsers();
+                } else {
+                    showError('addUserError', result.error || 'Failed to add user');
+                }
+            } catch (err) {
+                showError('addUserError', 'Network error: ' + err.message);
+            }
+        });
+
+        // Add code
+        document.getElementById('addCodeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const adminKey = document.getElementById('adminKey').value;
+            if (!adminKey) {
+                showError('addCodeError', 'Please enter admin API key');
+                return;
+            }
+
+            const data = {
+                code: document.getElementById('code').value,
+                value: document.getElementById('amount').value,
+                limit: document.getElementById('limit').value,
+                wagerRequirement: document.getElementById('wager').value,
+                timeline: document.getElementById('timeline').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/codes`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-admin-key': adminKey
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showSuccess('addCodeSuccess', `Code ${data.code} added successfully!`);
+                    document.getElementById('addCodeForm').reset();
+                    loadCodes();
+                } else {
+                    showError('addCodeError', result.error || 'Failed to add code');
+                }
+            } catch (err) {
+                showError('addCodeError', 'Network error: ' + err.message);
+            }
+        });
+
+        // Load users
+        async function loadUsers() {
+            const adminKey = document.getElementById('adminKey').value;
+            if (!adminKey) {
+                alert('Please enter admin API key');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users`, {
+                    headers: { 'x-admin-key': adminKey }
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to load users');
+                    return;
+                }
+
+                const data = await response.json();
+                const users = data.users || [];
+                const stats = data.stats || {};
+                
+                // Update turbo status from server
+                superTurboEnabled = stats.superTurbo || false;
+                updateTurboUI();
+                
+                const tbody = document.getElementById('usersBody');
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">No users yet</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map(user => {
+                    // Format expiry in user-friendly way
+                    let expiryDisplay = 'Never';
+                    if (user.expiryAt) {
+                        const expiryDate = new Date(user.expiryAt);
+                        const now = new Date();
+                        const diffMs = expiryDate - now;
+                        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                        
+                        if (diffMs < 0) {
+                            expiryDisplay = 'Expired';
+                        } else if (diffMs < 60 * 60 * 1000) {
+                            const minutes = Math.ceil(diffMs / (1000 * 60));
+                            expiryDisplay = `${minutes} min${minutes !== 1 ? 's' : ''}`;
+                        } else if (diffMs < 24 * 60 * 60 * 1000) {
+                            const hours = Math.ceil(diffMs / (1000 * 60 * 60));
+                            expiryDisplay = `${hours} hour${hours !== 1 ? 's' : ''}`;
+                        } else if (diffDays <= 7) {
+                            expiryDisplay = `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+                        } else {
+                            const dateStr = expiryDate.toISOString().split('T')[0];
+                            const timeStr = expiryDate.toISOString().split('T')[1].split('.')[0];
+                            expiryDisplay = `${dateStr} ${timeStr} UTC`;
+                        }
+                    }
+                    
+                    // Format created date
+                    const createdDate = new Date(user.createdAt);
+                    const createdDateStr = createdDate.toISOString().split('T')[0];
+                    const createdTimeStr = createdDate.toISOString().split('T')[1].split('.')[0];
+                    const createdDisplay = `${createdDateStr} ${createdTimeStr} UTC`;
+                    
+                    // Online status
+                    const onlineClass = user.isOnline ? 'online' : 'offline';
+                    const onlineText = user.isOnline ? 'Online' : 'Offline';
+                    
+                    return `
+                    <tr>
+                        <td><span class="online-dot ${onlineClass}"></span>${onlineText}</td>
+                        <td>${user.id}</td>
+                        <td>${user.telegramUserId || '-'}</td>
+                        <td><strong>${user.username}</strong></td>
+                        <td><span class="status ${user.status}">${user.status}</span></td>
+                        <td>${expiryDisplay}</td>
+                        <td>${createdDisplay}</td>
+                        <td><button class="delete-btn" onclick="deleteUser(${user.id})">Delete</button></td>
+                    </tr>
+                    `;
+                }).join('');
+
+                // Update stats
+                document.getElementById('totalUsers').textContent = stats.total || users.length;
+                document.getElementById('onlineUsers').textContent = stats.online || 0;
+            } catch (err) {
+                console.error('Error loading users:', err);
+            }
+        }
+
+        // Load codes
+        async function loadCodes() {
+            try {
+                const response = await fetch(`${API_URL}/api/codes`);
+                const codes = await response.json();
+                
+                const tbody = document.getElementById('codesBody');
+                if (codes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">No codes yet</td></tr>';
+                    document.getElementById('totalCodes').textContent = '0';
+                    return;
+                }
+
+                tbody.innerHTML = codes.map(code => {
+                    const createdDate = new Date(code.timestamp);
+                    const dateStr = createdDate.toISOString().split('T')[0];
+                    const timeStr = createdDate.toISOString().split('T')[1].split('.')[0];
+                    const createdDisplay = `${dateStr} ${timeStr} UTC`;
+                    
+                    return `
+                    <tr>
+                        <td><strong>${code.code}</strong></td>
+                        <td>${code.value || code.amount || '-'}</td>
+                        <td>${code.limit || '-'}</td>
+                        <td>${code.wagerRequirement || code.wager || '-'}</td>
+                        <td>${code.timeline || code.deadline || '-'}</td>
+                        <td><span class="status ${code.claimed ? 'expired' : 'active'}">${code.claimed ? 'Claimed' : 'Available'}</span></td>
+                        <td>${createdDisplay}</td>
+                        <td><button class="delete-btn" onclick="deleteCode('${code.code}')">Delete</button></td>
+                    </tr>
+                    `;
+                }).join('');
+
+                document.getElementById('totalCodes').textContent = codes.length;
+            } catch (err) {
+                console.error('Error loading codes:', err);
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Delete this user?')) return;
+            
+            const adminKey = document.getElementById('adminKey').value;
+            try {
+                await fetch(`${API_URL}/api/admin/users/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'x-admin-key': adminKey }
+                });
+                loadUsers();
+            } catch (err) {
+                alert('Error deleting user');
+            }
+        }
+
+        async function deleteCode(code) {
+            if (!confirm('Delete this code?')) return;
+            
+            const adminKey = document.getElementById('adminKey').value;
+            if (!adminKey) {
+                alert('Please enter admin API key');
+                return;
+            }
+            
+            try {
+                await fetch(`${API_URL}/api/admin/codes/${code}`, { 
+                    method: 'DELETE',
+                    headers: { 'x-admin-key': adminKey }
+                });
+                loadCodes();
+            } catch (err) {
+                alert('Error deleting code');
+            }
+        }
+
+        function showSuccess(id, message) {
+            const el = document.getElementById(id);
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function showError(id, message) {
+            const el = document.getElementById(id);
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        // Load settings on page load
+        async function loadSettings() {
+            try {
+                const response = await fetch(`${API_URL}/api/settings`);
+                const settings = await response.json();
+                superTurboEnabled = settings.superTurbo || false;
+                updateTurboUI();
+                document.getElementById('onlineUsers').textContent = settings.onlineUsers || 0;
+            } catch (err) {
+                console.error('Error loading settings:', err);
+            }
+        }
+        
+        // WebSocket for real-time updates
+        let adminWs = null;
+        let wsReconnectTimeout = null;
+        const onlineUsersList = new Map(); // Track online users by accountId
+        
+        function connectAdminWebSocket() {
+            const adminKey = document.getElementById('adminKey').value;
+            if (!adminKey) return;
+            
+            // Determine WebSocket URL
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+            
+            try {
+                adminWs = new WebSocket(wsUrl);
+                
+                adminWs.onopen = () => {
+                    console.log('🔌 Admin WebSocket connected');
+                    // Subscribe to admin updates
+                    adminWs.send(JSON.stringify({ 
+                        type: 'admin_subscribe', 
+                        adminKey: adminKey 
+                    }));
+                    updateWsStatus(true);
+                };
+                
+                adminWs.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleAdminUpdate(data);
+                    } catch (e) {
+                        console.error('Failed to parse WS message:', e);
+                    }
+                };
+                
+                adminWs.onclose = () => {
+                    console.log('🔌 Admin WebSocket disconnected');
+                    updateWsStatus(false);
+                    // Reconnect after 5 seconds
+                    wsReconnectTimeout = setTimeout(connectAdminWebSocket, 5000);
+                };
+                
+                adminWs.onerror = (err) => {
+                    console.error('Admin WS error:', err);
+                };
+            } catch (e) {
+                console.error('Failed to create WebSocket:', e);
+            }
+        }
+        
+        function handleAdminUpdate(data) {
+            console.log('📡 Admin update:', data);
+            
+            switch (data.type) {
+                case 'user_connected':
+                    onlineUsersList.set(data.accountId, { username: data.username, connectedAt: Date.now() });
+                    document.getElementById('onlineUsers').textContent = data.totalOnline;
+                    showToast(`🟢 ${data.username} connected`, 'success');
+                    updateUserRowStatus(data.accountId, true);
+                    break;
+                    
+                case 'user_disconnected':
+                    onlineUsersList.delete(data.accountId);
+                    document.getElementById('onlineUsers').textContent = data.totalOnline;
+                    showToast(`🔴 ${data.username} disconnected`, 'warning');
+                    updateUserRowStatus(data.accountId, false);
+                    break;
+                    
+                case 'new_code':
+                    showToast(`🎰 New code: ${data.code?.code || 'Unknown'}`, 'info');
+                    loadCodes(); // Refresh codes list
+                    break;
+            }
+        }
+        
+        function updateUserRowStatus(accountId, isOnline) {
+            // Find the row for this account and update the status dot
+            const rows = document.querySelectorAll('#usersBody tr');
+            rows.forEach(row => {
+                const idCell = row.cells[1];
+                if (idCell && idCell.textContent == accountId) {
+                    const statusCell = row.cells[0];
+                    const dot = statusCell.querySelector('.online-dot');
+                    if (dot) {
+                        dot.className = `online-dot ${isOnline ? 'online' : 'offline'}`;
+                    }
+                    statusCell.innerHTML = `<span class="online-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}`;
+                }
+            });
+        }
+        
+        function updateWsStatus(connected) {
+            // Could add a visual indicator for WS status
+            const statusIndicator = document.querySelector('.ws-status');
+            if (statusIndicator) {
+                statusIndicator.className = `ws-status ${connected ? 'connected' : 'disconnected'}`;
+                statusIndicator.title = connected ? 'Real-time updates active' : 'Reconnecting...';
+            }
+        }
+        
+        function showToast(message, type = 'info') {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                background: ${type === 'success' ? '#00c853' : type === 'warning' ? '#ff9800' : '#2196f3'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Initial load
+        loadSettings();
+        loadCodes();
+        
+        // Connect WebSocket when admin key is entered
+        document.getElementById('adminKey').addEventListener('change', () => {
+            if (adminWs) {
+                adminWs.close();
+            }
+            connectAdminWebSocket();
+        });
+
+        // Auto-refresh every 10 seconds (fallback for when WS is down)
+        setInterval(() => {
+            const adminKey = document.getElementById('adminKey').value;
+            if (adminKey) {
+                loadUsers();
+            }
+            loadCodes();
+            loadSettings();
+        }, 10000);
+        
+        // Add toast animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

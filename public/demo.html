@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shuffle Code Claimer - Design Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f1419;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        #shuffle-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999999;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-title {
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .header-version {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+        
+        .header-username {
+            font-size: 13px;
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+        }
+        
+        .header-stats > div span {
+            opacity: 0.8;
+        }
+        
+        .header-stats b {
+            font-weight: 700;
+        }
+        
+        .status-indicator {
+            padding: 5px 12px;
+            background: rgba(0,255,136,0.2);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #00ff88;
+        }
+        
+        .btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .connect-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 999998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .connect-overlay.active {
+            display: flex;
+        }
+        
+        .connect-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 60px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .connect-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .connect-card h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0 0 15px;
+        }
+        
+        .connect-card p {
+            font-size: 18px;
+            color: #718096;
+            margin: 0 0 40px;
+            line-height: 1.6;
+        }
+        
+        .connect-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 48px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .connect-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .connect-btn:active {
+            transform: translateY(0);
+        }
+        
+        .demo-content {
+            padding-top: 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px 40px;
+        }
+        
+        .demo-section {
+            background: #1a1f2e;
+            border: 1px solid #2a3f5f;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .demo-section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+        
+        .toggle-btns {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .toggle-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .toggle-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- PROFESSIONAL HEADER BAR -->
+    <div id="shuffle-header">
+        <div class="header-left">
+            <span class="header-title">🎰 Shuffle Code Claimer</span>
+            <span class="header-version">v3.0 - Professional Edition</span>
+            <span class="header-username">👤 johndoe123</span>
+        </div>
+        <div class="header-right">
+            <div class="header-stats">
+                <div><span>Total:</span> <b style="color:#fff;">15</b></div>
+                <div><span>Claimed:</span> <b style="color:#00ff88;">8</b></div>
+                <div><span>Rejected:</span> <b style="color:#ff4444;">2</b></div>
+                <div><span>Pending:</span> <b style="color:#ffa500;">5</b></div>
+            </div>
+            <div class="status-indicator">✅ Active</div>
+            <button class="btn">📊 Dashboard</button>
+        </div>
+    </div>
+    
+    <!-- CONNECT OVERLAY (hidden by default) -->
+    <div class="connect-overlay" id="connect-overlay">
+        <div class="connect-card">
+            <div class="connect-icon">🎰</div>
+            <h1>Shuffle Code Claimer</h1>
+            <p>Connect your account to automatically claim promotional codes</p>
+            <button class="connect-btn">🔗 Connect to Claim Codes</button>
+        </div>
+    </div>
+    
+    <!-- DEMO CONTENT -->
+    <div class="demo-content">
+        <div class="demo-section">
+            <h2>🎨 Design Preview</h2>
+            <p style="color: #e0e6ed; margin-bottom: 20px;">
+                This is what your Tampermonkey script looks like with the professional design! 
+                The header bar is always visible at the top when you visit shuffle.com.
+            </p>
+            
+            <div class="toggle-btns">
+                <button class="toggle-btn" onclick="showOverlay()">Show Connect Overlay</button>
+                <button class="toggle-btn" onclick="hideOverlay()">Show Header Bar</button>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; margin-top: 20px;">
+                <h3 style="color: #00ff88; margin-bottom: 15px;">✨ Features:</h3>
+                <ul style="color: #e0e6ed; line-height: 2;">
+                    <li>🎨 <strong>Professional gradient design</strong> - Purple/blue theme</li>
+                    <li>⚡ <strong>Real-time stats</strong> - Total, Claimed, Rejected, Pending counts</li>
+                    <li>🔒 <strong>Username-only auth</strong> - Simple connect flow</li>
+                    <li>🔄 <strong>Session reset</strong> - Prevents account switching</li>
+                    <li>📊 <strong>Live dashboard</strong> - See all codes in real-time</li>
+                    <li>🚀 <strong>Auto-claim</strong> - Instant code redemption every 3s</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>📥 How to Install</h2>
+            <ol style="color: #e0e6ed; line-height: 2.5; padding-left: 20px;">
+                <li>Install <strong>Tampermonkey</strong> browser extension</li>
+                <li>Click Tampermonkey → <strong>Create new script</strong></li>
+                <li>Copy entire <code style="background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px;">ShuffleCodeClaimer.user.js</code> file</li>
+                <li>Paste into Tampermonkey and <strong>Save</strong> (Ctrl+S)</li>
+                <li>Visit <strong>shuffle.com</strong> - you'll see this design!</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        function showOverlay() {
+            document.getElementById('connect-overlay').classList.add('active');
+        }
+        
+        function hideOverlay() {
+            document.getElementById('connect-overlay').classList.remove('active');
+        }
+        
+        // Auto-show connect overlay for demo
+        setTimeout(showOverlay, 1000);
+    </script>
+</body>
+</html>

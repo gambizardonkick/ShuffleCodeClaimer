@@ -1,0 +1,35 @@
+{
+  "name": "shuffle-code-claimer",
+  "version": "1.0.0",
+  "description": "Shuffle Code Claimer Bot with Subscription Management",
+  "main": "server/api.js",
+  "engines": {
+    "node": "20.x",
+    "npm": "10.x"
+  },
+  "scripts": {
+    "start": "node server/api.js"
+  },
+  "keywords": [
+    "shuffle",
+    "telegram",
+    "bot",
+    "crypto"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^24.10.1",
+    "axios": "^1.13.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.6.0",
+    "input": "^1.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2",
+    "telegraf": "^4.16.3",
+    "telegram": "^2.26.22",
+    "ws": "^8.18.3"
+  }
+}
