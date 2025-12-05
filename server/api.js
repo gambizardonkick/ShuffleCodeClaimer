@@ -24,10 +24,14 @@ if (typeof gc === 'function') {
 
 initializeFirebase();
 
-// Initialize Telegram notifier - use TELEGRAM_BOT_TOKEN for code notifications
-// SUBSCRIPTION_BOT_TOKEN is for the subscription management bot
+// Initialize TWO Telegram notifiers:
+// 1. telegramNotifier - for code notifications (uses @ShuffleCodeClaimerBot)
+// 2. subscriptionNotifier - for payment confirmations (uses the subscription bot users interact with)
 const notifierBotToken = process.env.TELEGRAM_BOT_TOKEN || process.env.SUBSCRIPTION_BOT_TOKEN;
+const subscriptionBotToken = process.env.SUBSCRIPTION_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+
 const telegramNotifier = new TelegramNotifier(notifierBotToken);
+const subscriptionNotifier = new TelegramNotifier(subscriptionBotToken);
 
 // Validate bot token on startup
 async function validateBotToken() {
@@ -482,10 +486,10 @@ app.post('/api/oxapay/webhook', express.raw({ type: '*/*' }), async (req, res) =
     if (paymentStatus === 'confirming') {
       console.log(`⏳ Payment confirming for subscription ${subscription.id}`);
       
-      // Send "confirming" notification to user and save message ID
+      // Send "confirming" notification via SUBSCRIPTION BOT (same bot user interacted with)
       if (subscription.telegramChatId) {
         try {
-          const confirmingMsg = await telegramNotifier.sendMessage(
+          const confirmingMsg = await subscriptionNotifier.sendMessage(
             subscription.telegramChatId,
             `⏳ *Payment Received!*\n\nYour payment is being confirmed on the blockchain. This usually takes 1-5 minutes.\n\nWe'll notify you once it's complete! ✅`,
             { parse_mode: 'Markdown' }
@@ -498,7 +502,7 @@ app.post('/api/oxapay/webhook', express.raw({ type: '*/*' }), async (req, res) =
             });
           }
           
-          console.log('📨 Sent confirming notification to user');
+          console.log('📨 Sent confirming notification to user (via subscription bot)');
         } catch (notifyError) {
           console.error('❌ Error sending confirming notification:', notifyError);
         }
@@ -575,12 +579,12 @@ app.post('/api/oxapay/webhook', express.raw({ type: '*/*' }), async (req, res) =
         }
       }
       
-      // Send Telegram notification
+      // Send Telegram notification using SUBSCRIPTION BOT (same bot user interacted with)
       if (subscription.telegramChatId) {
         try {
           // Delete the "confirming" message if it exists
           if (subscription.confirmingMessageId) {
-            await telegramNotifier.deleteMessage(
+            await subscriptionNotifier.deleteMessage(
               subscription.telegramChatId,
               subscription.confirmingMessageId
             );
@@ -589,15 +593,15 @@ app.post('/api/oxapay/webhook', express.raw({ type: '*/*' }), async (req, res) =
           
           // Delete the original payment message if it exists
           if (subscription.paymentMessageId) {
-            await telegramNotifier.deleteMessage(
+            await subscriptionNotifier.deleteMessage(
               subscription.telegramChatId,
               subscription.paymentMessageId
             );
             console.log('🗑️ Deleted payment message');
           }
           
-          // Send fresh confirmation message
-          await telegramNotifier.notifyPaymentConfirmed(
+          // Send fresh confirmation message via subscription bot
+          await subscriptionNotifier.notifyPaymentConfirmed(
             subscription.telegramChatId,
             null,
             {
@@ -607,7 +611,7 @@ app.post('/api/oxapay/webhook', express.raw({ type: '*/*' }), async (req, res) =
               usernames: subscription.pendingUsernames || []
             }
           );
-          console.log('📨 Sent payment confirmation to user');
+          console.log('📨 Sent payment confirmation to user (via subscription bot)');
         } catch (notifyError) {
           console.error('❌ Error sending Telegram notification:', notifyError);
         }
