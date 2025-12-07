@@ -37,6 +37,16 @@ class TelegramNotifier {
     }
   }
 
+  // Silent reachability test - doesn't send any user-visible message
+  async canReachChat(chatId) {
+    try {
+      await this._makeRequest('getChat', { chat_id: chatId });
+      return { reachable: true };
+    } catch (error) {
+      return { reachable: false, error: error.message };
+    }
+  }
+
   async notifyPaymentConfirmed(chatId, messageId, subscriptionDetails) {
     const expiryDate = new Date(subscriptionDetails.expiryDate);
     
