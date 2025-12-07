@@ -375,8 +375,20 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 
-// REQUEST LOGGER - Log ALL incoming requests for debugging
+// REQUEST LOGGER - Only log important requests
 app.use((req, res, next) => {
+  // Skip logging for spammy/polling endpoints
+  const skipUrls = [
+    '/api/codes',      // Client polling
+    '/health',         // Health checks
+    '/api/heartbeat',  // Heartbeat polling
+    '/api/check',      // Status checks
+  ];
+  
+  if (skipUrls.some(url => req.url === url || req.url.startsWith(url + '?'))) {
+    return next();
+  }
+  
   const timestamp = new Date().toISOString();
   console.log(`📥 [${timestamp}] ${req.method} ${req.url} from ${req.ip || req.connection.remoteAddress}`);
   next();
@@ -389,6 +401,39 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     service: 'shuffle-api-server'
   });
+});
+
+// Notification Bot Webhook - Handle /start command for @ShuffleCodeClaimerBot
+app.post('/api/telegram/webhook', express.json(), async (req, res) => {
+  try {
+    const update = req.body;
+    
+    // Handle /start command
+    if (update.message?.text === '/start') {
+      const chatId = update.message.chat.id;
+      const firstName = update.message.from?.first_name || 'there';
+      
+      const welcomeMessage = 
+        `👋 Hello ${firstName}!\n\n` +
+        `This bot sends you notifications for:\n` +
+        `• ✅ Successful code claims\n` +
+        `• ❌ Failed/rejected codes\n` +
+        `• 🟢 Connection status updates\n\n` +
+        `*To use this bot:*\n` +
+        `1. Purchase a subscription via @ShuffleSubscriptionBot\n` +
+        `2. Enable "Telegram DM Alerts" in the Tampermonkey dashboard\n\n` +
+        `📢 Join our Telegram for codes: https://t.me/shufflecodesdrops\n\n` +
+        `🔗 Your chat is now linked and ready to receive notifications!`;
+      
+      await telegramNotifier.sendMessage(chatId, welcomeMessage);
+      console.log(`👋 /start from ${firstName} (${chatId})`);
+    }
+    
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Telegram webhook error:', error);
+    res.json({ ok: true }); // Always return OK to Telegram
+  }
 });
 
 // Webhook Test Endpoint - verifies webhook is reachable
@@ -1052,6 +1097,31 @@ app.post('/api/notifications/sync', requireAuth, async (req, res) => {
     
     if (typeof telegramNotifyEnabled !== 'boolean') {
       return res.status(400).json({ error: 'telegramNotifyEnabled must be a boolean' });
+    }
+    
+    // If enabling, verify chat ID is reachable first (silent probe - no user-visible message)
+    if (telegramNotifyEnabled) {
+      const account = await firebaseDB.getShuffleAccountWithUser(shuffleAccountId);
+      const telegramId = account?.user?.telegramUserId;
+      
+      if (!telegramId) {
+        return res.status(400).json({ 
+          error: 'No Telegram ID linked',
+          needsStart: true,
+          botLink: 'https://t.me/ShuffleCodeClaimerBot'
+        });
+      }
+      
+      // Silent reachability test - doesn't send any user-visible message
+      const reachability = await telegramNotifier.canReachChat(telegramId);
+      if (!reachability.reachable) {
+        console.log(`❌ Cannot reach chat ${telegramId}: ${reachability.error}`);
+        return res.status(400).json({ 
+          error: 'Cannot send messages to your Telegram. Please click /start on the bot first.',
+          needsStart: true,
+          botLink: 'https://t.me/ShuffleCodeClaimerBot'
+        });
+      }
     }
     
     // Update the shuffle account with the notification preference
@@ -1783,16 +1853,16 @@ app.post('/api/claim-result', requireAuth, async (req, res) => {
         const safeValue = escapeMarkdown(value);
         
         const message = success 
-          ? `✅ CODE CLAIMED\\!\n\n` +
-            `Code: \`${code}\`\n` +
-            (value ? `💰 Value: ${safeValue}\n` : '') +
-            `👤 Account: ${safeUsername}\n\n` +
-            `🎉 Successfully added to your balance\\!`
+          ? `✅ CODE CLAIMED!\n\n` +
+            `Code: ${code}\n` +
+            (value ? `💰 Value: ${value}\n` : '') +
+            `👤 Account: ${username}\n\n` +
+            `🎉 Successfully added to your balance!`
           : `❌ CODE REJECTED\n\n` +
-            `Code: \`${code}\`\n` +
-            `👤 Account: ${safeUsername}\n` +
-            `📝 Reason: ${safeReason}\n\n` +
-            `💡 This code may be expired or already claimed\\.`;
+            `Code: ${code}\n` +
+            `👤 Account: ${username}\n` +
+            `📝 Reason: ${reason || 'Unknown'}\n\n` +
+            `💡 This code may be expired or already claimed.`;
         
         console.log(`📤 Sending claim DM to ${telegramUserId}...`);
         
