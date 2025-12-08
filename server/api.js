@@ -379,10 +379,13 @@ app.use(cors());
 app.use((req, res, next) => {
   // Skip logging for spammy/polling endpoints
   const skipUrls = [
-    '/api/codes',      // Client polling
-    '/health',         // Health checks
-    '/api/heartbeat',  // Heartbeat polling
-    '/api/check',      // Status checks
+    '/api/codes',        // Client polling
+    '/health',           // Health checks
+    '/api/heartbeat',    // Heartbeat polling
+    '/api/check',        // Status checks
+    '/api/settings',     // Admin dashboard polling
+    '/api/admin/users',  // Admin dashboard polling
+    '/',                 // Root health probes
   ];
   
   if (skipUrls.some(url => req.url === url || req.url.startsWith(url + '?'))) {
