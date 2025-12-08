@@ -76,6 +76,57 @@ async function validateBotToken() {
 // Track bot status globally
 let telegramBotValid = false;
 
+// Register webhook for notification bot /start handling
+async function registerNotificationBotWebhook() {
+  // Get webhook URL from environment
+  const webhookDomain = process.env.DOMAIN || 
+    (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null);
+  
+  if (!webhookDomain || !notifierBotToken) {
+    console.log('⚠️  [TELEGRAM] Skipping webhook registration (no domain or token)');
+    return false;
+  }
+  
+  const webhookUrl = `${webhookDomain}/api/telegram/webhook`;
+  
+  return new Promise((resolve) => {
+    const postData = JSON.stringify({ url: webhookUrl });
+    const req = https.request({
+      hostname: 'api.telegram.org',
+      path: `/bot${notifierBotToken}/setWebhook`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const result = JSON.parse(data);
+          if (result.ok) {
+            console.log(`✅ [TELEGRAM] Webhook registered: ${webhookUrl}`);
+            resolve(true);
+          } else {
+            console.error(`❌ [TELEGRAM] Webhook registration failed: ${result.description}`);
+            resolve(false);
+          }
+        } catch (e) {
+          console.error('❌ [TELEGRAM] Failed to parse webhook response:', e.message);
+          resolve(false);
+        }
+      });
+    });
+    req.on('error', (e) => {
+      console.error('❌ [TELEGRAM] Network error registering webhook:', e.message);
+      resolve(false);
+    });
+    req.write(postData);
+    req.end();
+  });
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'shuffle-codes-secret-change-in-production';
 
 // ============================================
@@ -107,7 +158,7 @@ const CODE_CACHE_DURATION = 5 * 60 * 1000; // Keep codes for 5 minutes
 
 // ACTIVE CONNECTIONS TRACKING (for admin dashboard)
 const activeConnections = new Map(); // shuffleAccountId -> { username, lastSeen }
-const CONNECTION_TIMEOUT = 60000; // Consider offline after 60 seconds
+const CONNECTION_TIMEOUT = 180000; // Consider offline after 180 seconds (tolerates browser tab throttling)
 
 // WEBSOCKET CONNECTIONS (for instant code delivery)
 const wsClients = new Map(); // shuffleAccountId -> WebSocket
@@ -344,17 +395,19 @@ function broadcastTurboState(enabled) {
 }
 
 // Cleanup stale connections every 30 seconds
+// ONLY remove if WebSocket is also disconnected (WebSocket is source of truth)
 setInterval(() => {
   const now = Date.now();
   let removed = 0;
   for (const [id, data] of activeConnections) {
-    if (now - data.lastSeen > CONNECTION_TIMEOUT) {
+    // Only mark offline if WebSocket is also closed
+    if (!wsClients.has(id) && now - data.lastSeen > CONNECTION_TIMEOUT) {
       activeConnections.delete(id);
       removed++;
     }
   }
   if (removed > 0) {
-    console.log(`🔌 Connection cleanup: ${removed} users went offline, ${activeConnections.size} online`);
+    console.log(`🔌 Connection cleanup: ${removed} stale entries removed, ${activeConnections.size} online`);
   }
 }, 30000);
 
@@ -1947,6 +2000,9 @@ const server = app.listen(PORT, '0.0.0.0', async () => {
   // Validate Telegram bot token for notifications
   console.log('\n============ TELEGRAM BOT VALIDATION ============');
   telegramBotValid = await validateBotToken();
+  if (telegramBotValid) {
+    await registerNotificationBotWebhook();
+  }
   console.log('==================================================\n');
   
   // Initialize WebSocket server - ULTRA OPTIMIZED FOR SPEED
