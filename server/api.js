@@ -1099,7 +1099,7 @@ app.get('/api/settings', (req, res) => {
   res.json({
     superTurbo: superTurboMode,
     pollInterval: superTurboMode ? 50 : 200,
-    onlineUsers: activeConnections.size,
+    onlineUsers: wsClients.size,  // WebSocket is source of truth
     notifications: notificationSettings
   });
 });
@@ -1564,7 +1564,7 @@ app.get('/api/admin/users', async (req, res) => {
         expiryAt: account.expiryAt,
         createdAt: account.createdAt,
         telegramUserId: user ? user.telegramUserId : null,
-        isOnline: activeConnections.has(accountId),
+        isOnline: wsClients.has(accountId),  // WebSocket is source of truth
         lastSeen: activeConnections.get(accountId)?.lastSeen || null,
       }));
       
