@@ -729,8 +729,68 @@ async function notifyPaymentConfirmed(telegramUserId, messageId, subscriptionDet
   }
 }
 
+// Track notified expirations to avoid duplicate messages
+const notifiedExpirations = new Set();
+
+// Check for expired subscriptions and notify users
+async function checkExpiredSubscriptions() {
+  try {
+    const now = new Date();
+    const allAccounts = await firebaseDB.getAllShuffleAccounts();
+    
+    if (!allAccounts) return;
+    
+    for (const [accountId, account] of Object.entries(allAccounts)) {
+      if (!account.expiryAt || account.status === 'expired') continue;
+      
+      const expiryDate = new Date(account.expiryAt);
+      const notificationKey = `${accountId}_${account.expiryAt}`;
+      
+      // Skip if already notified for this expiration
+      if (notifiedExpirations.has(notificationKey)) continue;
+      
+      // Check if expired
+      if (expiryDate <= now) {
+        // Mark as notified
+        notifiedExpirations.add(notificationKey);
+        
+        // Get user's telegram ID
+        const user = await firebaseDB.findUserById(account.userId);
+        if (!user?.telegramUserId) continue;
+        
+        // Update account status to expired
+        await firebaseDB.updateShuffleAccount(parseInt(accountId), { status: 'expired' });
+        
+        // Send expiration notification
+        const expiryMsg = 
+          `⚠️ *SUBSCRIPTION EXPIRED*\n\n` +
+          `Your subscription for *${account.username}* has expired.\n\n` +
+          `❌ Auto-claiming is now *disabled* for this account.\n\n` +
+          `To continue auto-claiming codes, please renew your subscription!`;
+        
+        try {
+          await bot.telegram.sendMessage(user.telegramUserId, expiryMsg, {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+              [Markup.button.callback('🔄 Renew Subscription', 'add_accounts')]
+            ])
+          });
+          console.log(`📧 Expiration notice sent to ${account.username} (${user.telegramUserId})`);
+        } catch (e) {
+          console.error(`Failed to send expiration notice to ${user.telegramUserId}:`, e.message);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error checking expired subscriptions:', error);
+  }
+}
+
+// Run expiration check every 5 minutes
+setInterval(checkExpiredSubscriptions, 5 * 60 * 1000);
+
 // Export for webhook handler
-module.exports = { bot, userSessions, notifyPaymentConfirmed };
+module.exports = { bot, userSessions, notifyPaymentConfirmed, checkExpiredSubscriptions };
 
 // Launch bot only if SUBSCRIPTION_BOT_TOKEN is set AND not being imported by combined-worker
 if (require.main === module) {
