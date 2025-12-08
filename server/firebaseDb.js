@@ -518,6 +518,17 @@ class FirebaseDB {
       accounts: deletedAccounts 
     };
   }
+
+  async getAllShuffleAccounts() {
+    const accountsRef = this.db.ref('shuffleAccounts');
+    const snapshot = await accountsRef.once('value');
+    
+    if (!snapshot.exists()) {
+      return null;
+    }
+    
+    return snapshot.val();
+  }
 }
 
 const firebaseDB = new FirebaseDB();
