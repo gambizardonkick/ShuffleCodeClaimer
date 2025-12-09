@@ -313,74 +313,77 @@
   <section id="guide" class="py-24 bg-dark-card/30 section-animate" data-delay="300ms">
     <div class="container mx-auto px-4">
       <div class="text-center mb-16">
-        <h2 class="text-4xl font-extrabold text-white">Setup Guide</h2>
-        <p class="text-lg text-gray-400 mt-3">Get up and running in minutes</p>
+        <h2 class="text-4xl font-extrabold text-white">How To Install</h2>
+        <p class="text-lg text-gray-400 mt-3">Super Easy Guide - 3 Simple Steps</p>
       </div>
 
-      <div class="max-w-4xl mx-auto space-y-8">
-        <!-- Quick Setup -->
-        <div class="bg-dark-card border border-dark-border rounded-2xl p-8">
-          <div class="flex items-center gap-4 mb-4">
-            <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl">
-              <i class="bi bi-lightning-fill"></i>
-            </div>
-            <div>
-              <h3 class="text-2xl font-semibold text-white">Quick Setup</h3>
-              <p class="text-gray-400">The fast track to get started.</p>
-            </div>
+      <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-6">
+        <!-- Step 1 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <span class="font-bold">1</span>
           </div>
-          <ol class="list-decimal list-inside space-y-3 text-gray-300 pl-2">
-            <li>Install <strong>Tampermonkey</strong> from Chrome/Edge/Firefox stores.</li>
-            <li>Enable <strong>Developer Mode</strong> if your browser requires it.</li>
-            <li>Install the script: <a href="https://openuserjs.org/install/ShuffleCodeClaimer/Shuffle_Code_Claimer.user.js" class="text-brand-light hover:underline">Shuffle_Code_Claimer.user.js</a></li>
-            <li>Restart your browser.</li>
-            <li>Open <a href="https://shuffle.com" target="_blank" class="text-brand-light hover:underline">Shuffle.com</a> and click <strong>Connect</strong>.</li>
-          </ol>
+          <h3 class="text-xl font-semibold text-white mb-4">Install Tampermonkey</h3>
+          <p class="text-gray-400 mb-6">Download and install Tampermonkey extension for your browser.</p>
+          <div class="space-y-3">
+            <a class="block w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" target="_blank">
+              <i class="bi bi-browser-chrome mr-2"></i>Chrome
+            </a>
+            <a class="block w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd" target="_blank">
+              <i class="bi bi-browser-edge mr-2"></i>Edge
+            </a>
+            <a class="block w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/" target="_blank">
+              <i class="bi bi-browser-firefox mr-2"></i>Firefox
+            </a>
+          </div>
         </div>
 
-        <!-- Detailed Instructions -->
+        <!-- Step 2 -->
         <div class="bg-dark-card border border-dark-border rounded-2xl p-8">
-          <div class="flex items-center gap-4 mb-6">
-            <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl">
-              <i class="bi bi-list-check"></i>
-            </div>
-            <div>
-              <h3 class="text-2xl font-semibold text-white">Detailed Instructions</h3>
-              <p class="text-gray-400">Step-by-step installation.</p>
-            </div>
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <span class="font-bold">2</span>
           </div>
-
-          <div class="space-y-6">
+          <h3 class="text-xl font-semibold text-white mb-4 text-center">Enable Script Permissions</h3>
+          <div class="text-gray-400 space-y-4">
             <div>
-              <h4 class="text-xl font-semibold text-white mb-3">1. Install Tampermonkey</h4>
-              <p class="text-gray-400 mb-4">Choose your browser:</p>
-              <div class="grid sm:grid-cols-3 gap-4">
-                <a class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" target="_blank">Chrome</a>
-                <a class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd" target="_blank">Edge</a>
-                <a class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/" target="_blank">Firefox</a>
-              </div>
+              <p class="text-white font-medium mb-2">Go to extensions page:</p>
+              <code class="block bg-dark-bg px-3 py-2 rounded-md text-sm text-gray-300">chrome://extensions</code>
             </div>
-
             <div>
-              <h4 class="text-xl font-semibold text-white mb-3">2. Enable Developer Mode</h4>
-              <ul class="list-disc list-inside space-y-2 text-gray-400 pl-2">
-                <li>Chrome: go to <code class="bg-dark-bg px-2 py-1 rounded-md text-sm text-gray-300">chrome://extensions</code></li>
-                <li>Edge: go to <code class="bg-dark-bg px-2 py-1 rounded-md text-sm text-gray-300">edge://extensions</code></li>
-                <li>Enable <strong>Allow User Scripts</strong> in Tampermonkey settings.</li>
+              <p class="text-white font-medium mb-2">Turn on Developer Mode</p>
+              <p class="text-sm">(toggle in top-right corner)</p>
+            </div>
+            <div>
+              <p class="text-white font-medium mb-2">Find Tampermonkey and enable:</p>
+              <ul class="text-sm space-y-1 pl-2">
+                <li><i class="bi bi-check-lg text-green-400 mr-1"></i>Allow access to file URLs</li>
+                <li><i class="bi bi-check-lg text-green-400 mr-1"></i>Allow User Scripts</li>
               </ul>
             </div>
-
-            <div>
-              <h4 class="text-xl font-semibold text-white mb-3">3. Install the Shuffle Code Claimer Script</h4>
-              <p class="text-gray-400 mb-4">Click the script link below to install:</p>
-              <a href="https://openuserjs.org/install/ShuffleCodeClaimer/Shuffle_Code_Claimer.user.js" class="inline-flex items-center justify-center px-6 py-3 font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow transition-transform hover:scale-105">
-                <i class="bi bi-filetype-js mr-2 text-xl"></i>Install Userscript
+            <div class="pt-2">
+              <p class="text-white font-medium mb-2">Then click the button below:</p>
+              <a href="https://openuserjs.org/install/ShuffleCodeClaimer/Shuffle_Code_Claimer.user.js" class="block w-full py-3 text-center font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-lg shadow-brand-glow transition-transform hover:scale-105">
+                <i class="bi bi-download mr-2"></i>Install Script
               </a>
+              <p class="text-sm text-center mt-2">Tampermonkey will open - click <strong>Install</strong></p>
             </div>
-            
-            <div>
-              <h4 class="text-xl font-semibold text-white mb-3">4. Restart Browser & Open Shuffle.com</h4>
-              <p class="text-gray-400">Once the site loads, the script panel appears at the top with a <strong>Connect</strong> button.</p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <span class="font-bold">3</span>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-4">Open Shuffle & Refresh</h3>
+          <p class="text-gray-400 mb-6">Just open Shuffle.com, press Refresh, and the script starts working instantly!</p>
+          <div class="space-y-4">
+            <a href="https://shuffle.com" target="_blank" class="block w-full py-3 text-center font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg shadow-lg transition-transform hover:scale-105">
+              <i class="bi bi-box-arrow-up-right mr-2"></i>Open Shuffle.com
+            </a>
+            <div class="bg-dark-bg rounded-lg p-4">
+              <p class="text-green-400 font-medium"><i class="bi bi-check-circle-fill mr-2"></i>You're all set!</p>
+              <p class="text-sm text-gray-400 mt-2">The code claimer panel will appear at the top of the page.</p>
             </div>
           </div>
         </div>
