@@ -636,7 +636,7 @@ async function grantFreeTrial(ctx, user, usernames) {
       { 
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
-          [Markup.button.url('🚀 Setup Your Bot Now', 'https://shufflecodeclaimer.onrender.com/#guide')]
+          [Markup.button.url('🚀 Setup Your Bot Now', 'https://shufflecodeclaimer.com/#guide')]
         ])
       }
     );
@@ -710,7 +710,7 @@ async function notifyPaymentConfirmed(telegramUserId, messageId, subscriptionDet
       { 
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
-          [Markup.button.url('🚀 Setup Your Bot Now', 'https://shufflecodeclaimer.onrender.com/#guide')]
+          [Markup.button.url('🚀 Setup Your Bot Now', 'https://shufflecodeclaimer.com/#guide')]
         ])
       }
     );
