@@ -1,1052 +1,697 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shuffle Code Claimer - Admin Dashboard</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shuffle Code Claimer — #1 Auto Code Claimer for Shuffle.com</title>
+  <meta name="description" content="Shuffle Code Claimer is the fastest automatic promo code claimer for Shuffle.com. Get instant code detection, auto-redemption, Telegram alerts & 24/7 uptime. Start with a free 30-minute trial!" />
+  <meta name="keywords" content="shuffle code claimer, shuffle promo codes, shuffle.com codes, shuffle bonus codes, auto claimer, shuffle bot, shuffle code bot, shuffle rewards" />
+  <meta name="author" content="Shuffle Code Claimer" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://shufflecodeclaimer.com/" />
+  <link rel="icon" href="https://i.postimg.cc/D0vSfm2H/unnamed-3.jpg" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://shufflecodeclaimer.com/" />
+  <meta property="og:title" content="Shuffle Code Claimer — #1 Auto Code Claimer for Shuffle.com" />
+  <meta property="og:description" content="The fastest automatic promo code claimer for Shuffle.com. Instant detection, auto-redemption, Telegram alerts & free 30-minute trial!" />
+  <meta property="og:image" content="https://i.postimg.cc/D0vSfm2H/unnamed-3.jpg" />
+  <meta property="og:site_name" content="Shuffle Code Claimer" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://shufflecodeclaimer.com/" />
+  <meta name="twitter:title" content="Shuffle Code Claimer — #1 Auto Code Claimer for Shuffle.com" />
+  <meta name="twitter:description" content="The fastest automatic promo code claimer for Shuffle.com. Instant detection, auto-redemption & Telegram alerts!" />
+  <meta name="twitter:image" content="https://i.postimg.cc/D0vSfm2H/unnamed-3.jpg" />
+  
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Shuffle Code Claimer",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Web Browser",
+    "description": "Automatic promo code claimer for Shuffle.com with instant detection, auto-redemption, and Telegram notifications.",
+    "url": "https://shufflecodeclaimer.com/",
+    "image": "https://i.postimg.cc/D0vSfm2H/unnamed-3.jpg",
+    "author": {
+      "@type": "Organization",
+      "name": "Shuffle Code Claimer"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "10.00",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "priceValidUntil": "2026-12-31"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "150",
+      "bestRating": "5",
+      "worstRating": "1"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Shuffle Code Claimer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Shuffle Code Claimer is an automatic promo code detection and redemption tool for Shuffle.com. It monitors Telegram groups for new codes and instantly redeems them on your account."
         }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a free trial?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! We offer a free 30-minute trial for all new users. No payment required to try it out."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How fast is the code claiming?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Our system detects and claims codes in under 1 second. We use real-time monitoring to ensure you never miss a code."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is it safe to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Shuffle Code Claimer runs as a browser extension and never stores your Shuffle password. It only automates the code redemption process."
+        }
+      }
+    ]
+  }
+  </script>
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+  <!-- 1. Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+  <!-- 2. Google Font (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-        .header {
-            background: rgba(255,255,255,0.95);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+  <!-- 3. Bootstrap Icons (for the icons) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+  <!-- 4. Custom Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#7b4bff',
+              light: '#9b77ff',
+            },
+            dark: {
+              bg: '#07080c',
+              card: '#0d0f14',
+              border: 'rgba(255, 255, 255, 0.06)',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'brand-glow': '0 4px 40px rgba(123, 75, 255, 0.35)',
+            'brand-glow-lg': '0 8px 60px rgba(123, 75, 255, 0.45)',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+          },
         }
+      }
+    }
+  </script>
 
-        .logo {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-        }
-
-        h1 {
-            color: #2d3748;
-            font-size: 32px;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            color: #718096;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: rgba(255,255,255,0.95);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #4a5568;
-            margin-bottom: 8px;
-        }
-
-        input, textarea, select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .duration-btns {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .duration-btns button {
-            width: auto;
-            padding: 8px 12px;
-            font-size: 12px;
-            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-        }
-
-        .duration-btns button:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: #f7fafc;
-            padding: 12px;
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            color: #4a5568;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 14px;
-            color: #2d3748;
-        }
-
-        .status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status.active {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-
-        .status.expired {
-            background: #fed7d7;
-            color: #742a2a;
-        }
-
-        .success {
-            background: #c6f6d5;
-            color: #22543d;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        .error {
-            background: #fed7d7;
-            color: #742a2a;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        .help-text {
-            font-size: 12px;
-            color: #718096;
-            margin-top: 5px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 12px;
-            color: white;
-        }
-
-        .stat-card.online {
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-        }
-
-        .stat-card.turbo {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .stat-card.turbo:hover {
-            transform: scale(1.02);
-        }
-
-        .stat-card.turbo.active {
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
-            50% { box-shadow: 0 0 20px 10px rgba(255,107,107,0.3); }
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .delete-btn {
-            background: #fc8181;
-            padding: 6px 12px;
-            font-size: 12px;
-            width: auto;
-            display: inline-block;
-        }
-
-        .delete-btn:hover {
-            background: #f56565;
-        }
-
-        .online-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        .online-dot.online {
-            background: #00ff88;
-            box-shadow: 0 0 8px #00ff88;
-            animation: blink 2s infinite;
-        }
-
-        .online-dot.offline {
-            background: #666;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .turbo-toggle {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .turbo-status {
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: rgba(0,0,0,0.2);
-        }
-    </style>
+  <!-- 5. Custom Styles for animations and scrollbar -->
+  <style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d0f14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #7b4bff;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9b77ff;
+    }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo-section">
-                <div class="logo">🎰</div>
-                <div>
-                    <h1>Shuffle Code Claimer Admin <span id="roleIndicator" style="font-size: 16px; font-weight: normal;"></span></h1>
-                    <div class="subtitle">Manage users, subscriptions, and codes</div>
-                </div>
-            </div>
-            <div>
-                <label>Admin API Key</label>
-                <input type="password" id="adminKey" placeholder="Enter admin API key" style="width: 300px;" />
-            </div>
-        </div>
 
-        <div class="stats">
-            <div class="stat-card full-admin-only">
-                <div class="stat-value" id="totalUsers">0</div>
-                <div class="stat-label">Total Users</div>
-            </div>
-            <div class="stat-card online full-admin-only">
-                <div class="stat-value" id="onlineUsers">0</div>
-                <div class="stat-label">🟢 Online Now</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalCodes">0</div>
-                <div class="stat-label">Codes in Cache</div>
-            </div>
-            <div class="stat-card turbo full-admin-only" id="turboCard" onclick="toggleSuperTurbo()">
-                <div class="stat-value turbo-toggle">
-                    <span id="turboStatus">OFF</span>
-                    <span class="turbo-status" id="pollInterval">200ms</span>
-                </div>
-                <div class="stat-label">🚀 Super Turbo Mode</div>
-            </div>
-        </div>
+<body class="bg-dark-bg text-gray-200 font-sans">
 
-        <div class="grid">
-            <div class="card full-admin-only">
-                <div class="card-title">➕ Add User Manually</div>
-                <div class="success" id="addUserSuccess"></div>
-                <div class="error" id="addUserError"></div>
-                <form id="addUserForm">
-                    <div class="form-group">
-                        <label>Telegram User ID</label>
-                        <input type="text" id="telegramUserId" placeholder="123456789" required />
-                        <div class="help-text">Get this from the user's Telegram profile</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Shuffle Username</label>
-                        <input type="text" id="username" placeholder="johndoe123" required />
-                        <div class="help-text">The username from shuffle.com/vip-program</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Expiry Date (UTC Time)</label>
-                        <input type="datetime-local" id="expiryAt" required />
-                        <div class="duration-btns">
-                            <button type="button" onclick="setDuration(1)">1 Day</button>
-                            <button type="button" onclick="setDuration(7)">7 Days</button>
-                            <button type="button" onclick="setDuration(30)">1 Month</button>
-                            <button type="button" onclick="setDuration(90)">3 Months</button>
-                            <button type="button" onclick="setDuration(180)">6 Months</button>
-                            <button type="button" onclick="setDuration(365)">1 Year</button>
-                            <button type="button" onclick="setDuration(36500)">Lifetime</button>
-                        </div>
-                        <div class="help-text">When the subscription should expire (stored as UTC)</div>
-                    </div>
-                    <button type="submit">Add User</button>
-                </form>
-            </div>
+  <!-- NAVBAR -->
+  <nav class="sticky top-0 z-50 w-full backdrop-blur-lg bg-dark-bg/70 border-b border-dark-border transition-all duration-300">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center h-16">
+        
+        <!-- Logo -->
+        <a class="flex items-center gap-2" href="#home">
+          <img src="https://i.postimg.cc/D0vSfm2H/unnamed-3.jpg" width="34" height="34" class="rounded-lg" alt="Shuffle Code Claimer Logo">
+          <span class="text-lg font-semibold text-white">Shuffle Code Claimer</span>
+        </a>
 
-            <div class="card">
-                <div class="card-title">📝 Add Code Manually</div>
-                <div class="success" id="addCodeSuccess"></div>
-                <div class="error" id="addCodeError"></div>
-                <form id="addCodeForm">
-                    <div class="form-group">
-                        <label>Code</label>
-                        <input type="text" id="code" placeholder="ABC123XYZ" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Value</label>
-                        <input type="text" id="amount" placeholder="$1.50" />
-                        <div class="help-text">Examples: $1.50, $2.00, $15.00</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Limit</label>
-                        <input type="text" id="limit" placeholder="First 2000" />
-                        <div class="help-text">Examples: First 2000, First 300, First 1000</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Wager Req.</label>
-                        <input type="text" id="wager" placeholder="$4,500" />
-                        <div class="help-text">Examples: $4,500, $6,000, $50,000</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Timeline</label>
-                        <input type="text" id="timeline" placeholder="7 days" />
-                        <div class="help-text">Examples: 24h, 3 days, 7 days</div>
-                    </div>
-                    <button type="submit">Add Code</button>
-                </form>
-            </div>
-        </div>
+        <!-- Mobile Menu Button -->
+        <button id="nav-btn" class="md:hidden text-gray-300 hover:text-white" aria-label="Toggle menu">
+          <i class="bi bi-list text-3xl"></i>
+        </button>
 
-        <div class="card full-admin-only">
-            <div class="card-title">👥 All Users</div>
-            <button onclick="loadUsers()" style="width: auto; margin-bottom: 15px;">🔄 Refresh</button>
-            <div class="table-container">
-                <table id="usersTable">
-                    <thead>
-                        <tr>
-                            <th>Status</th>
-                            <th>ID</th>
-                            <th>Telegram ID</th>
-                            <th>Username</th>
-                            <th>Sub Status</th>
-                            <th>Expires</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersBody">
-                        <tr><td colspan="8" style="text-align: center; padding: 40px;">Enter admin key and click Refresh</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <!-- Desktop Nav -->
+        <div class="hidden md:flex items-center gap-6">
+          <a href="#how" class="text-gray-400 hover:text-white transition-colors">How it works</a>
+          <a href="#guide" class="text-gray-400 hover:text-white transition-colors">Setup Guide</a>
+          <a href="#channels" class="text-gray-400 hover:text-white transition-colors">Channels</a>
+          <a href="#bots" class="text-gray-400 hover:text-white transition-colors">Bots</a>
+          <a href="#pricing" class="text-gray-400 hover:text-white transition-colors">Pricing</a>
+          <a href="#faq" class="text-gray-400 hover:text-white transition-colors">FAQ</a>
+          <a href="#buy" class="ml-4 px-4 py-2 text-sm font-medium text-brand-light border-2 border-brand/50 rounded-lg hover:bg-brand/10 transition-colors">
+            Get Access
+          </a>
         </div>
-
-        <div class="card">
-            <div class="card-title">🎁 All Codes</div>
-            <button onclick="loadCodes()" style="width: auto; margin-bottom: 15px;">🔄 Refresh</button>
-            <div class="table-container">
-                <table id="codesTable">
-                    <thead>
-                        <tr>
-                            <th>Code</th>
-                            <th>Value</th>
-                            <th>Limit</th>
-                            <th>Wager Req.</th>
-                            <th>Timeline</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="codesBody">
-                        <tr><td colspan="8" style="text-align: center; padding: 40px;">No codes yet</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <script>
-        const API_URL = window.location.origin;
-        let superTurboEnabled = false;
-        let adminPermissions = null;
+    <!-- Mobile Nav Menu (hidden by default) -->
+    <div id="nav-menu" class="hidden md:hidden absolute top-16 left-0 w-full bg-dark-card border-b border-dark-border shadow-lg">
+      <div class="flex flex-col p-4 space-y-3">
+        <a href="#how" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">How it works</a>
+        <a href="#guide" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">Setup Guide</a>
+        <a href="#channels" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">Channels</a>
+        <a href="#bots" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">Bots</a>
+        <a href="#pricing" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">Pricing</a>
+        <a href="#faq" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-dark-border">FAQ</a>
+        <a href="#buy" class="block w-full px-4 py-3 text-center font-medium text-white bg-gradient-to-r from-brand to-brand-light rounded-lg hover:opacity-90 transition-opacity">
+          Get Access
+        </a>
+      </div>
+    </div>
+  </nav>
 
-        // Set default expiry to 1 month from now
-        const defaultExpiry = new Date();
-        defaultExpiry.setMonth(defaultExpiry.getMonth() + 1);
-        document.getElementById('expiryAt').value = defaultExpiry.toISOString().slice(0, 16);
+  <!-- HERO -->
+  <header id="home" class="relative pt-32 pb-24 text-center overflow-hidden">
+    <!-- Background Glow -->
+    <div class="absolute inset-0 -z-10 overflow-hidden">
+      <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[40rem] h-[40rem] bg-brand/30 rounded-full blur-[150px] opacity-30"></div>
+    </div>
 
-        function setDuration(days) {
-            const expiry = new Date();
-            expiry.setDate(expiry.getDate() + days);
-            document.getElementById('expiryAt').value = expiry.toISOString().slice(0, 16);
-        }
+    <div class="container mx-auto px-4 section-animate" data-delay="100ms">
+      <div class="max-w-4xl mx-auto">
         
-        // Verify admin key and update UI based on permissions
-        async function verifyAdminKey() {
-            const adminKey = document.getElementById('adminKey').value;
-            if (!adminKey) {
-                adminPermissions = null;
-                updateUIForRole();
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/api/admin/verify`, {
-                    headers: { 'x-admin-key': adminKey }
-                });
-                
-                if (response.ok) {
-                    adminPermissions = await response.json();
-                    console.log('Admin role:', adminPermissions.role);
-                    updateUIForRole();
-                    
-                    // Load data based on permissions
-                    if (adminPermissions.canAccessUsers) {
-                        loadUsers();
-                    }
-                    loadCodes();
-                } else {
-                    adminPermissions = null;
-                    updateUIForRole();
-                    alert('Invalid admin key');
-                }
-            } catch (err) {
-                console.error('Error verifying admin key:', err);
-                adminPermissions = null;
-                updateUIForRole();
-            }
-        }
+        <!-- Pills -->
+        <div class="flex justify-center gap-2 mb-6 flex-wrap">
+          <span class="py-1.5 px-4 bg-dark-card border border-dark-border rounded-full text-xs font-medium text-gray-300">WebSocket Delivery</span>
+          <span class="py-1.5 px-4 bg-dark-card border border-dark-border rounded-full text-xs font-medium text-gray-300">Instant Execution</span>
+          <span class="py-1.5 px-4 bg-dark-card border border-dark-border rounded-full text-xs font-medium text-gray-300">Smart Reload Logic</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tighter mb-5">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-light to-brand shadow-brand-glow">Shuffle Code Claimer</span>
+          <span class="text-white"> — Auto Promo Bot</span>
+        </h1>
+
+        <!-- Subheadline -->
+        <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mt-6">
+          A fully‑optimized, ultra‑fast userscript that claims Shuffle.gg codes the moment they're released.
+          Zero clicking. Zero delay. Maximum results.
+        </p>
+
+        <!-- CTAs -->
+        <div class="mt-10 flex flex-wrap justify-center gap-4">
+          <a href="#buy" class="inline-flex items-center justify-center px-8 py-3.5 text-lg font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow transition-transform hover:scale-105">
+            <i class="bi bi-lightning-charge-fill mr-2"></i>
+            Start Now
+          </a>
+          <a href="#how" class="inline-flex items-center justify-center px-8 py-3.5 text-lg font-semibold text-gray-300 bg-dark-card border border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            <i class="bi bi-play-circle mr-2"></i>
+            How it Works
+          </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex flex-wrap justify-center gap-3 mt-10 text-center">
+          <div class="py-1.5 px-4 bg-dark-card/50 border border-dark-border rounded-full text-sm text-gray-400"><strong>10–50ms</strong> avg latency</div>
+          <div class="py-1.5 px-4 bg-dark-card/50 border border-dark-border rounded-full text-sm text-gray-400"><strong>99.9%</strong> uptime</div>
+          <div class="py-1.5 px-4 bg-dark-card/50 border border-dark-border rounded-full text-sm text-gray-400"><strong>Auto</strong> reload execution</div>
+        </div>
         
-        // Show/hide sections based on admin role
-        function updateUIForRole() {
-            const fullAccessSections = document.querySelectorAll('.full-admin-only');
-            const roleIndicator = document.getElementById('roleIndicator');
-            
-            if (!adminPermissions) {
-                fullAccessSections.forEach(el => el.style.display = 'none');
-                if (roleIndicator) roleIndicator.textContent = '';
-                return;
-            }
-            
-            // Update role indicator
-            if (roleIndicator) {
-                roleIndicator.textContent = adminPermissions.role === 'full' ? '(Full Access)' : '(Codes Only)';
-                roleIndicator.style.color = adminPermissions.role === 'full' ? '#00c853' : '#ff9800';
-            }
-            
-            // Show/hide full-admin-only sections
-            fullAccessSections.forEach(el => {
-                el.style.display = adminPermissions.role === 'full' ? '' : 'none';
-            });
-        }
+      </div>
+    </div>
+  </header>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="py-24 section-animate" data-delay="200ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">How It Works</h2>
+        <p class="text-lg text-gray-400 mt-3">3 steps • Zero effort • Maximum speed</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Card 1 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <i class="bi bi-broadcast"></i>
+          </div>
+          <h3 class="text-2xl font-semibold text-white mb-3">Real‑Time Monitoring</h3>
+          <p class="text-gray-400">Our backend tracks Shuffle code channels 24/7 and pushes drops instantly to your browser.</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <i class="bi bi-lightning-fill"></i>
+          </div>
+          <h3 class="text-2xl font-semibold text-white mb-3">Instant Auto‑Claim</h3>
+          <p class="text-gray-400">Your userscript executes the claim in milliseconds with human‑like timing randomness.</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <i class="bi bi-arrow-repeat"></i>
+          </div>
+          <h3 class="text-2xl font-semibold text-white mb-3">Smart Reload Logic</h3>
+          <p class="text-gray-400">Reload eligibility is detected automatically and executed safely before code claiming.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETUP GUIDE -->
+  <section id="guide" class="py-24 bg-dark-card/30 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">How To Install</h2>
+        <p class="text-lg text-gray-400 mt-3">Super Easy Guide - 3 Simple Steps</p>
+      </div>
+
+      <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-6">
+        <!-- Step 1 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <span class="font-bold">1</span>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-4">Install Tampermonkey</h3>
+          <p class="text-gray-400 mb-6">Download and install Tampermonkey extension for your browser.</p>
+          <div class="space-y-3">
+            <a class="block w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" target="_blank">
+              <i class="bi bi-browser-chrome mr-2"></i>Chrome
+            </a>
+            <a class="block w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd" target="_blank">
+              <i class="bi bi-browser-edge mr-2"></i>Edge
+            </a>
+            <a class="block w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors" href="https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/" target="_blank">
+              <i class="bi bi-browser-firefox mr-2"></i>Firefox
+            </a>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <span class="font-bold">2</span>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-4 text-center">Enable Script Permissions</h3>
+          <div class="text-gray-400 space-y-4">
+            <div>
+              <p class="text-white font-medium mb-2">Go to extensions page:</p>
+              <code class="block bg-dark-bg px-3 py-2 rounded-md text-sm text-gray-300">chrome://extensions</code>
+            </div>
+            <div>
+              <p class="text-white font-medium mb-2">Turn on Developer Mode</p>
+              <p class="text-sm">(toggle in top-right corner)</p>
+            </div>
+            <div>
+              <p class="text-white font-medium mb-2">Find Tampermonkey and enable:</p>
+              <ul class="text-sm space-y-1 pl-2">
+                <li><i class="bi bi-check-lg text-green-400 mr-1"></i>Allow access to file URLs</li>
+                <li><i class="bi bi-check-lg text-green-400 mr-1"></i>Allow User Scripts</li>
+              </ul>
+            </div>
+            <div class="pt-2">
+              <p class="text-white font-medium mb-2">Then click the button below:</p>
+              <a href="https://openuserjs.org/install/ShuffleCodeClaimer/Shuffle_Code_Claimer.user.js" class="block w-full py-3 text-center font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-lg shadow-brand-glow transition-transform hover:scale-105">
+                <i class="bi bi-download mr-2"></i>Install Script
+              </a>
+              <p class="text-sm text-center mt-2">Tampermonkey will open - click <strong>Install</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center">
+          <div class="w-16 h-16 bg-brand/10 text-brand text-3xl flex items-center justify-center rounded-xl mx-auto mb-6">
+            <span class="font-bold">3</span>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-4">Open Shuffle & Refresh</h3>
+          <p class="text-gray-400 mb-6">Just open Shuffle.com, press Refresh, and the script starts working instantly!</p>
+          <div class="space-y-4">
+            <a href="https://shuffle.com" target="_blank" class="block w-full py-3 text-center font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg shadow-lg transition-transform hover:scale-105">
+              <i class="bi bi-box-arrow-up-right mr-2"></i>Open Shuffle.com
+            </a>
+            <div class="bg-dark-bg rounded-lg p-4">
+              <p class="text-green-400 font-medium"><i class="bi bi-check-circle-fill mr-2"></i>You're all set!</p>
+              <p class="text-sm text-gray-400 mt-2">The code claimer panel will appear at the top of the page.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHANNELS -->
+  <section id="channels" class="py-24 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">Community Channels</h2>
+        <p class="text-lg text-gray-400 mt-3">Stay updated with official & community drops</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Channel 1 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col">
+          <h3 class="text-2xl font-semibold text-white mb-3 flex justify-between items-center">
+            Official Drops <i class="bi bi-telegram text-sky-400"></i>
+          </h3>
+          <p class="text-gray-400 mt-2 mb-4 flex-grow">Official Shuffle.gg code releases and promotions.</p>
+          <a href="https://t.me/shufflecodesdrops" target="_blank" class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors">
+            @ShuffleCodesDrops
+          </a>
+        </div>
+
+        <!-- Channel 2 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col">
+          <h3 class="text-2xl font-semibold text-white mb-3 flex justify-between items-center">
+            Community Codes <i class="bi bi-telegram text-sky-400"></i>
+          </h3>
+          <p class="text-gray-400 mt-2 mb-4 flex-grow">Shared drops, user‑submitted finds, hidden rewards.</p>
+          <a href="https://t.me/shufflecommunitycodes" target="_blank" class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors">
+            @ShuffleCommunityCodes
+          </a>
+        </div>
+
+        <!-- Channel 3 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col">
+          <h3 class="text-2xl font-semibold text-white mb-3 flex justify-between items-center">
+            Announcements <i class="bi bi-megaphone-fill text-yellow-400"></i>
+          </h3>
+          <p class="text-gray-400 mt-2 mb-4 flex-grow">Updates, maintenance, upgrades, and patch notes.</p>
+          <a href="https://t.me/shuffleclaimernews" target="_blank" class="w-full py-3 text-center font-medium text-brand-light border-2 border-brand/30 rounded-lg hover:bg-brand/10 transition-colors">
+            @ShuffleClaimerNews
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTS -->
+  <section id="bots" class="py-24 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">Telegram Bots</h2>
+        <p class="text-lg text-gray-400 mt-3">Subscriptions • Activation • Support</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <!-- Bot 1 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 flex flex-col">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-2xl font-semibold text-white">Subscription Bot</h3>
+            <span class="py-1 px-3 bg-brand/10 text-brand-light text-xs font-medium rounded-full">Global</span>
+          </div>
+          <ul class="space-y-3 my-4 text-gray-300 flex-grow">
+            <li class="flex items-center gap-3"><i class="bi bi-check2-circle text-brand text-xl"></i> Purchase or renew plans</li>
+            <li class="flex items-center gap-3"><i class="bi bi-check2-circle text-brand text-xl"></i> Auto activation</li>
+            <li class="flex items-center gap-3"><i class="bi bi-check2-circle text-brand text-xl"></i> Crypto payments</li>
+          </ul>
+          <a class="w-full py-3.5 text-center text-lg font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow transition-transform hover:scale-105" href="https://t.me/ShuffleSubscriptionBot" target="_blank">
+            <i class="bi bi-telegram mr-2"></i>@ShuffleSubscriptionBot
+          </a>
+        </div>
+
+        <!-- Bot 2 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-8 flex flex-col">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-2xl font-semibold text-white">Support</h3>
+            <span class="py-1 px-3 bg-gray-700 text-gray-300 text-xs font-medium rounded-full">Help</span>
+          </div>
+          <ul class="space-y-3 my-4 text-gray-300 flex-grow">
+            <li class="flex items-center gap-3"><i class="bi bi-check-circle text-gray-500 text-xl"></i> Troubleshooting</li>
+            <li class="flex items-center gap-3"><i class="bi bi-check-circle text-gray-500 text-xl"></i> Bindings / issues</li>
+            <li class="flex items-center gap-3"><i class="bi bi-check-circle text-gray-500 text-xl"></i> Manual assistance</li>
+          </ul>
+          <a class="w-full py-3.5 text-center text-lg font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white" href="https://t.me/ThaGoofy" target="_blank">
+            <i class="bi bi-telegram mr-2"></i>@ThaGoofy
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="py-24 bg-dark-card/30 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">Pricing</h2>
+        <p class="text-lg text-gray-400 mt-3">Flexible plans • Full feature access</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
         
-        // Handle admin key input
-        document.getElementById('adminKey').addEventListener('change', verifyAdminKey);
-        document.getElementById('adminKey').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                verifyAdminKey();
-            }
-        });
+        <!-- Plan 1: 1 Day -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <h3 class="text-xl font-semibold text-white">1 Day</h3>
+          <p class="text-xs text-brand-light mb-2 h-8">Perfect for Friday Stream</p>
+          <div class="text-4xl font-extrabold text-white my-3">$10</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 24-hour access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Full features</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            Choose 1 Day
+          </a>
+        </div>
 
-        // Toggle Super Turbo Mode
-        async function toggleSuperTurbo() {
-            const adminKey = document.getElementById('adminKey').value;
-            if (!adminKey) {
-                alert('Please enter admin API key first');
-                return;
-            }
+        <!-- Plan 2: 1 Week -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <h3 class="text-xl font-semibold text-white">1 Week</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$22</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 7-day access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Telegram support</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            Choose 1 Week
+          </a>
+        </div>
 
-            try {
-                const response = await fetch(`${API_URL}/api/admin/super-turbo`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-key': adminKey
-                    },
-                    body: JSON.stringify({ enabled: !superTurboEnabled })
-                });
+        <!-- Plan 3: 1 Month -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <h3 class="text-xl font-semibold text-white">1 Month</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$55</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 30-day access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Priority support</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            Choose 1 Month
+          </a>
+        </div>
 
-                const result = await response.json();
-                
-                if (response.ok) {
-                    superTurboEnabled = result.superTurbo;
-                    updateTurboUI();
-                } else {
-                    alert(result.error || 'Failed to toggle turbo mode');
-                }
-            } catch (err) {
-                alert('Error: ' + err.message);
-            }
-        }
+        <!-- Plan 4: 3 Months -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <h3 class="text-xl font-semibold text-white">3 Months</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$100</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 90-day access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Best value</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            Choose 3 Months
+          </a>
+        </div>
 
-        function updateTurboUI() {
-            const turboCard = document.getElementById('turboCard');
-            const turboStatus = document.getElementById('turboStatus');
-            const pollInterval = document.getElementById('pollInterval');
+      </div>
 
-            if (superTurboEnabled) {
-                turboCard.classList.add('active');
-                turboStatus.textContent = 'ON';
-                pollInterval.textContent = '50ms';
-            } else {
-                turboCard.classList.remove('active');
-                turboStatus.textContent = 'OFF';
-                pollInterval.textContent = '200ms';
-            }
-        }
-
-        // Add user
-        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const adminKey = document.getElementById('adminKey').value;
-            if (!adminKey) {
-                showError('addUserError', 'Please enter admin API key');
-                return;
-            }
-
-            const data = {
-                telegramUserId: document.getElementById('telegramUserId').value,
-                username: document.getElementById('username').value.toLowerCase(),
-                expiryAt: document.getElementById('expiryAt').value
-            };
-
-            try {
-                const response = await fetch(`${API_URL}/api/admin/shuffle-accounts`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-key': adminKey
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showSuccess('addUserSuccess', `User ${data.username} added successfully!`);
-                    document.getElementById('addUserForm').reset();
-                    document.getElementById('expiryAt').value = defaultExpiry.toISOString().slice(0, 16);
-                    loadUsers();
-                } else {
-                    showError('addUserError', result.error || 'Failed to add user');
-                }
-            } catch (err) {
-                showError('addUserError', 'Network error: ' + err.message);
-            }
-        });
-
-        // Add code
-        document.getElementById('addCodeForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const adminKey = document.getElementById('adminKey').value;
-            if (!adminKey) {
-                showError('addCodeError', 'Please enter admin API key');
-                return;
-            }
-
-            const data = {
-                code: document.getElementById('code').value,
-                value: document.getElementById('amount').value,
-                limit: document.getElementById('limit').value,
-                wagerRequirement: document.getElementById('wager').value,
-                timeline: document.getElementById('timeline').value
-            };
-
-            try {
-                const response = await fetch(`${API_URL}/api/admin/codes`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'x-admin-key': adminKey
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showSuccess('addCodeSuccess', `Code ${data.code} added successfully!`);
-                    document.getElementById('addCodeForm').reset();
-                    loadCodes();
-                } else {
-                    showError('addCodeError', result.error || 'Failed to add code');
-                }
-            } catch (err) {
-                showError('addCodeError', 'Network error: ' + err.message);
-            }
-        });
-
-        // Load users
-        async function loadUsers() {
-            const adminKey = document.getElementById('adminKey').value;
-            if (!adminKey) {
-                alert('Please enter admin API key');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_URL}/api/admin/users`, {
-                    headers: { 'x-admin-key': adminKey }
-                });
-
-                if (!response.ok) {
-                    console.error('Failed to load users');
-                    return;
-                }
-
-                const data = await response.json();
-                const users = data.users || [];
-                const stats = data.stats || {};
-                
-                // Update turbo status from server
-                superTurboEnabled = stats.superTurbo || false;
-                updateTurboUI();
-                
-                const tbody = document.getElementById('usersBody');
-                if (users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">No users yet</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = users.map(user => {
-                    // Format expiry in user-friendly way
-                    let expiryDisplay = 'Never';
-                    if (user.expiryAt) {
-                        const expiryDate = new Date(user.expiryAt);
-                        const now = new Date();
-                        const diffMs = expiryDate - now;
-                        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-                        
-                        if (diffMs < 0) {
-                            expiryDisplay = 'Expired';
-                        } else if (diffMs < 60 * 60 * 1000) {
-                            const minutes = Math.ceil(diffMs / (1000 * 60));
-                            expiryDisplay = `${minutes} min${minutes !== 1 ? 's' : ''}`;
-                        } else if (diffMs < 24 * 60 * 60 * 1000) {
-                            const hours = Math.ceil(diffMs / (1000 * 60 * 60));
-                            expiryDisplay = `${hours} hour${hours !== 1 ? 's' : ''}`;
-                        } else if (diffDays <= 7) {
-                            expiryDisplay = `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
-                        } else {
-                            const dateStr = expiryDate.toISOString().split('T')[0];
-                            const timeStr = expiryDate.toISOString().split('T')[1].split('.')[0];
-                            expiryDisplay = `${dateStr} ${timeStr} UTC`;
-                        }
-                    }
-                    
-                    // Format created date
-                    const createdDate = new Date(user.createdAt);
-                    const createdDateStr = createdDate.toISOString().split('T')[0];
-                    const createdTimeStr = createdDate.toISOString().split('T')[1].split('.')[0];
-                    const createdDisplay = `${createdDateStr} ${createdTimeStr} UTC`;
-                    
-                    // Online status
-                    const onlineClass = user.isOnline ? 'online' : 'offline';
-                    const onlineText = user.isOnline ? 'Online' : 'Offline';
-                    
-                    return `
-                    <tr>
-                        <td><span class="online-dot ${onlineClass}"></span>${onlineText}</td>
-                        <td>${user.id}</td>
-                        <td>${user.telegramUserId || '-'}</td>
-                        <td><strong>${user.username}</strong></td>
-                        <td><span class="status ${user.status}">${user.status}</span></td>
-                        <td>${expiryDisplay}</td>
-                        <td>${createdDisplay}</td>
-                        <td><button class="delete-btn" onclick="deleteUser(${user.id})">Delete</button></td>
-                    </tr>
-                    `;
-                }).join('');
-
-                // Update stats
-                document.getElementById('totalUsers').textContent = stats.total || users.length;
-                document.getElementById('onlineUsers').textContent = stats.online || 0;
-            } catch (err) {
-                console.error('Error loading users:', err);
-            }
-        }
-
-        // Load codes
-        async function loadCodes() {
-            try {
-                const response = await fetch(`${API_URL}/api/codes`);
-                const codes = await response.json();
-                
-                const tbody = document.getElementById('codesBody');
-                if (codes.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">No codes yet</td></tr>';
-                    document.getElementById('totalCodes').textContent = '0';
-                    return;
-                }
-
-                tbody.innerHTML = codes.map(code => {
-                    const createdDate = new Date(code.timestamp);
-                    const dateStr = createdDate.toISOString().split('T')[0];
-                    const timeStr = createdDate.toISOString().split('T')[1].split('.')[0];
-                    const createdDisplay = `${dateStr} ${timeStr} UTC`;
-                    
-                    return `
-                    <tr>
-                        <td><strong>${code.code}</strong></td>
-                        <td>${code.value || code.amount || '-'}</td>
-                        <td>${code.limit || '-'}</td>
-                        <td>${code.wagerRequirement || code.wager || '-'}</td>
-                        <td>${code.timeline || code.deadline || '-'}</td>
-                        <td><span class="status ${code.claimed ? 'expired' : 'active'}">${code.claimed ? 'Claimed' : 'Available'}</span></td>
-                        <td>${createdDisplay}</td>
-                        <td><button class="delete-btn" onclick="deleteCode('${code.code}')">Delete</button></td>
-                    </tr>
-                    `;
-                }).join('');
-
-                document.getElementById('totalCodes').textContent = codes.length;
-            } catch (err) {
-                console.error('Error loading codes:', err);
-            }
-        }
-
-        async function deleteUser(id) {
-            if (!confirm('Delete this user?')) return;
-            
-            const adminKey = document.getElementById('adminKey').value;
-            try {
-                await fetch(`${API_URL}/api/admin/users/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'x-admin-key': adminKey }
-                });
-                loadUsers();
-            } catch (err) {
-                alert('Error deleting user');
-            }
-        }
-
-        async function deleteCode(code) {
-            if (!confirm('Delete this code?')) return;
-            
-            const adminKey = document.getElementById('adminKey').value;
-            if (!adminKey) {
-                alert('Please enter admin API key');
-                return;
-            }
-            
-            try {
-                await fetch(`${API_URL}/api/admin/codes/${code}`, { 
-                    method: 'DELETE',
-                    headers: { 'x-admin-key': adminKey }
-                });
-                loadCodes();
-            } catch (err) {
-                alert('Error deleting code');
-            }
-        }
-
-        function showSuccess(id, message) {
-            const el = document.getElementById(id);
-            el.textContent = message;
-            el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 5000);
-        }
-
-        function showError(id, message) {
-            const el = document.getElementById(id);
-            el.textContent = message;
-            el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 5000);
-        }
-
-        // Load settings on page load
-        async function loadSettings() {
-            try {
-                const response = await fetch(`${API_URL}/api/settings`);
-                const settings = await response.json();
-                superTurboEnabled = settings.superTurbo || false;
-                updateTurboUI();
-                document.getElementById('onlineUsers').textContent = settings.onlineUsers || 0;
-            } catch (err) {
-                console.error('Error loading settings:', err);
-            }
-        }
+      <!-- Second Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-6">
         
-        // WebSocket for real-time updates
-        let adminWs = null;
-        let wsReconnectTimeout = null;
-        const onlineUsersList = new Map(); // Track online users by accountId
-        
-        function connectAdminWebSocket() {
-            const adminKey = document.getElementById('adminKey').value;
-            if (!adminKey) return;
-            
-            // Determine WebSocket URL
-            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
-            
-            try {
-                adminWs = new WebSocket(wsUrl);
-                
-                adminWs.onopen = () => {
-                    console.log('🔌 Admin WebSocket connected');
-                    // Subscribe to admin updates
-                    adminWs.send(JSON.stringify({ 
-                        type: 'admin_subscribe', 
-                        adminKey: adminKey 
-                    }));
-                    updateWsStatus(true);
-                };
-                
-                adminWs.onmessage = (event) => {
-                    try {
-                        const data = JSON.parse(event.data);
-                        handleAdminUpdate(data);
-                    } catch (e) {
-                        console.error('Failed to parse WS message:', e);
-                    }
-                };
-                
-                adminWs.onclose = () => {
-                    console.log('🔌 Admin WebSocket disconnected');
-                    updateWsStatus(false);
-                    // Reconnect after 5 seconds
-                    wsReconnectTimeout = setTimeout(connectAdminWebSocket, 5000);
-                };
-                
-                adminWs.onerror = (err) => {
-                    console.error('Admin WS error:', err);
-                };
-            } catch (e) {
-                console.error('Failed to create WebSocket:', e);
-            }
-        }
-        
-        function handleAdminUpdate(data) {
-            console.log('📡 Admin update:', data);
-            
-            switch (data.type) {
-                case 'user_connected':
-                    onlineUsersList.set(data.accountId, { username: data.username, connectedAt: Date.now() });
-                    document.getElementById('onlineUsers').textContent = data.totalOnline;
-                    showToast(`🟢 ${data.username} connected`, 'success');
-                    updateUserRowStatus(data.accountId, true);
-                    break;
-                    
-                case 'user_disconnected':
-                    onlineUsersList.delete(data.accountId);
-                    document.getElementById('onlineUsers').textContent = data.totalOnline;
-                    showToast(`🔴 ${data.username} disconnected`, 'warning');
-                    updateUserRowStatus(data.accountId, false);
-                    break;
-                    
-                case 'new_code':
-                    showToast(`🎰 New code: ${data.code?.code || 'Unknown'}`, 'info');
-                    loadCodes(); // Refresh codes list
-                    break;
-            }
-        }
-        
-        function updateUserRowStatus(accountId, isOnline) {
-            // Find the row for this account and update the status dot
-            const rows = document.querySelectorAll('#usersBody tr');
-            rows.forEach(row => {
-                const idCell = row.cells[1];
-                if (idCell && idCell.textContent == accountId) {
-                    const statusCell = row.cells[0];
-                    const dot = statusCell.querySelector('.online-dot');
-                    if (dot) {
-                        dot.className = `online-dot ${isOnline ? 'online' : 'offline'}`;
-                    }
-                    statusCell.innerHTML = `<span class="online-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}`;
-                }
-            });
-        }
-        
-        function updateWsStatus(connected) {
-            // Could add a visual indicator for WS status
-            const statusIndicator = document.querySelector('.ws-status');
-            if (statusIndicator) {
-                statusIndicator.className = `ws-status ${connected ? 'connected' : 'disconnected'}`;
-                statusIndicator.title = connected ? 'Real-time updates active' : 'Reconnecting...';
-            }
-        }
-        
-        function showToast(message, type = 'info') {
-            // Create toast notification
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 12px 20px;
-                background: ${type === 'success' ? '#00c853' : type === 'warning' ? '#ff9800' : '#2196f3'};
-                color: white;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-                z-index: 10000;
-                animation: slideIn 0.3s ease;
-            `;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
+        <!-- Plan 5: 6 Months -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-brand/50 hover:shadow-xl hover:-translate-y-1">
+          <h3 class="text-xl font-semibold text-white">6 Months</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$160</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 180-day access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> VIP support</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-gray-300 bg-dark-card border-2 border-dark-border rounded-xl transition-all hover:border-brand/50 hover:text-white">
+            Choose 6 Months
+          </a>
+        </div>
 
-        // Initial load
-        loadSettings();
-        loadCodes();
-        
-        // Connect WebSocket when admin key is entered
-        document.getElementById('adminKey').addEventListener('change', () => {
-            if (adminWs) {
-                adminWs.close();
-            }
-            connectAdminWebSocket();
-        });
+        <!-- Plan 6: 1 Year -->
+        <div class="bg-dark-card border-2 border-brand rounded-2xl p-6 flex flex-col relative shadow-brand-glow-lg transition-all duration-300 hover:-translate-y-2">
+          <span class="absolute -top-3 left-1/2 -translate-x-1/2 py-1 px-4 bg-brand text-white text-xs font-bold rounded-full">POPULAR</span>
+          <h3 class="text-xl font-semibold text-white">1 Year</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$250</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> 365-day access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Premium support</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow transition-transform hover:scale-105">
+            Choose 1 Year
+          </a>
+        </div>
 
-        // Auto-refresh every 10 seconds (fallback for when WS is down)
-        setInterval(() => {
-            const adminKey = document.getElementById('adminKey').value;
-            if (adminKey) {
-                loadUsers();
-            }
-            loadCodes();
-            loadSettings();
-        }, 10000);
+        <!-- Plan 7: Lifetime -->
+        <div class="bg-dark-card border-2 border-brand-light rounded-2xl p-6 flex flex-col relative shadow-brand-glow transition-all duration-300 hover:-translate-y-2">
+          <span class="absolute -top-3 left-1/2 -translate-x-1/2 py-1 px-4 bg-gradient-to-r from-brand to-brand-light text-white text-xs font-bold rounded-full">BEST VALUE</span>
+          <h3 class="text-xl font-semibold text-white">Lifetime</h3>
+          <p class="text-xs text-gray-500 mb-2 h-8">&nbsp;</p>
+          <div class="text-4xl font-extrabold text-white my-3">$400</div>
+          <ul class="space-y-2 my-3 text-gray-300 flex-grow text-sm">
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Unlimited access</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2-circle text-brand"></i> Lifetime updates</li>
+          </ul>
+          <a href="#buy" class="w-full py-2.5 text-center text-sm font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow transition-transform hover:scale-105">
+            Choose Lifetime
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-24 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
+        <p class="text-lg text-gray-400 mt-3">Everything you need to know</p>
+      </div>
+
+      <div class="max-w-3xl mx-auto space-y-4">
+        <!-- FAQ Item 1 -->
+        <details class="bg-dark-card border border-dark-border rounded-2xl p-6 transition-all duration-300 hover:border-brand/50">
+          <summary class="text-lg font-semibold text-white cursor-pointer">How fast does it claim codes?</summary>
+          <p class="text-gray-400 mt-3">The bot claims codes within 10-50ms of detection, giving you a significant advantage over manual claiming.</p>
+        </details>
+
+        <!-- FAQ Item 2 -->
+        <details class="bg-dark-card border border-dark-border rounded-2xl p-6 transition-all duration-300 hover:border-brand/50">
+          <summary class="text-lg font-semibold text-white cursor-pointer">Is it safe to use?</summary>
+          <p class="text-gray-400 mt-3">Yes, the script operates within Tampermonkey's sandbox and doesn't access sensitive data. It only automates code claiming actions you could do manually.</p>
+        </details>
+
+        <!-- FAQ Item 3 -->
+        <details class="bg-dark-card border border-dark-border rounded-2xl p-6 transition-all duration-300 hover:border-brand/50">
+          <summary class="text-lg font-semibold text-white cursor-pointer">What payment methods do you accept?</summary>
+          <p class="text-gray-400 mt-3">We accept cryptocurrency payments through OxaPay for secure, anonymous transactions.</p>
+        </details>
+
+        <!-- FAQ Item 4 -->
+        <details class="bg-dark-card border border-dark-border rounded-2xl p-6 transition-all duration-300 hover:border-brand/50">
+          <summary class="text-lg font-semibold text-white cursor-pointer">Can I use it on multiple accounts?</summary>
+          <p class="text-gray-400 mt-3">Each subscription is tied to one Shuffle account. Contact support for multi-account plans.</p>
+        </details>
+
+        <!-- FAQ Item 5 -->
+        <details class="bg-dark-card border border-dark-border rounded-2xl p-6 transition-all duration-300 hover:border-brand/50">
+          <summary class="text-lg font-semibold text-white cursor-pointer">What if I need help?</summary>
+          <p class="text-gray-400 mt-3">Contact our support bot @ThaGoofy on Telegram for assistance with setup and troubleshooting.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUY SECTION -->
+  <section id="buy" class="py-24 bg-dark-card/30 section-animate" data-delay="300ms">
+    <div class="container mx-auto px-4 text-center">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6">Ready to Start Claiming?</h2>
+        <p class="text-lg text-gray-400 mb-10">Join hundreds of users who never miss a code drop</p>
         
-        // Add toast animation styles
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
+        <a href="https://t.me/ShuffleSubscriptionBot" target="_blank" class="inline-flex items-center justify-center px-10 py-4 text-xl font-semibold text-white bg-gradient-to-r from-brand to-brand-light rounded-xl shadow-brand-glow-lg transition-transform hover:scale-105">
+          <i class="bi bi-telegram mr-3 text-2xl"></i>
+          Get Started Now
+        </a>
+
+        <p class="text-sm text-gray-500 mt-6">Instant activation • 24/7 support • Secure payments</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-dark-border">
+    <div class="container mx-auto px-4 text-center text-gray-500">
+      <p>&copy; 2025 Shuffle Code Claimer. All rights reserved.</p>
+      <p class="mt-2 text-sm">Not affiliated with Shuffle.com</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Mobile menu toggle
+    document.getElementById('nav-btn').addEventListener('click', function() {
+      const menu = document.getElementById('nav-menu');
+      menu.classList.toggle('hidden');
+    });
+
+    // Smooth scroll animations
+    const animatedElements = document.querySelectorAll('.section-animate');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    animatedElements.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+      observer.observe(el);
+    });
+  </script>
+
 </body>
 </html>
