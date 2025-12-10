@@ -1076,7 +1076,7 @@ app.post('/api/heartbeat', async (req, res) => {
     }
     
     // Update active connection
-    activeConnections.set(decoded.shuffleAccountId, {
+    activeConnections.set(Number(decoded.shuffleAccountId), {
       username: decoded.username,
       lastSeen: Date.now()
     });
@@ -1577,6 +1577,10 @@ app.get('/api/admin/users', async (req, res) => {
     // Add summary stats
     const onlineCount = accountsWithUsers.filter(u => u.isOnline).length;
     
+    // Debug: Log wsClients keys for troubleshooting
+    const wsClientIds = Array.from(wsClients.keys());
+    console.log(`📊 Admin users load: ${accountsWithUsers.length} accounts, wsClients keys: [${wsClientIds.join(', ')}], online: ${onlineCount}`);
+    
     res.json({
       users: accountsWithUsers,
       stats: {
@@ -2038,7 +2042,7 @@ const server = app.listen(PORT, '0.0.0.0', async () => {
         if (msg.type === 'auth' && msg.token) {
           try {
             const decoded = jwt.verify(msg.token, JWT_SECRET);
-            accountId = decoded.shuffleAccountId;
+            accountId = Number(decoded.shuffleAccountId);  // Ensure consistent numeric type
             authenticated = true;
             
             // Store connection with metadata
