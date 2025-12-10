@@ -142,6 +142,24 @@
             transform: translateY(0);
         }
 
+        .duration-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .duration-btns button {
+            width: auto;
+            padding: 8px 12px;
+            font-size: 12px;
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        }
+
+        .duration-btns button:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
         .table-container {
             overflow-x: auto;
             margin-top: 20px;
@@ -366,6 +384,15 @@
                     <div class="form-group">
                         <label>Expiry Date (UTC Time)</label>
                         <input type="datetime-local" id="expiryAt" required />
+                        <div class="duration-btns">
+                            <button type="button" onclick="setDuration(1)">1 Day</button>
+                            <button type="button" onclick="setDuration(7)">7 Days</button>
+                            <button type="button" onclick="setDuration(30)">1 Month</button>
+                            <button type="button" onclick="setDuration(90)">3 Months</button>
+                            <button type="button" onclick="setDuration(180)">6 Months</button>
+                            <button type="button" onclick="setDuration(365)">1 Year</button>
+                            <button type="button" onclick="setDuration(36500)">Lifetime</button>
+                        </div>
                         <div class="help-text">When the subscription should expire (stored as UTC)</div>
                     </div>
                     <button type="submit">Add User</button>
@@ -464,6 +491,12 @@
         const defaultExpiry = new Date();
         defaultExpiry.setMonth(defaultExpiry.getMonth() + 1);
         document.getElementById('expiryAt').value = defaultExpiry.toISOString().slice(0, 16);
+
+        function setDuration(days) {
+            const expiry = new Date();
+            expiry.setDate(expiry.getDate() + days);
+            document.getElementById('expiryAt').value = expiry.toISOString().slice(0, 16);
+        }
         
         // Verify admin key and update UI based on permissions
         async function verifyAdminKey() {
