@@ -417,144 +417,14 @@ bot.on('text', async (ctx) => {
       return;
     }
     
-    // ===== ELIGIBILITY CHECK =====
-    // Check if this Telegram ID has used the trial before
-    const hasTrialHistory = await firebaseDB.hasUsedTrial(telegramUserId);
-    
-    // Check if ANY of the usernames have been used for a trial before
-    let usernameHasTrialHistory = false;
-    for (const username of usernames) {
-      if (await firebaseDB.hasUsedTrial(null, username)) {
-        usernameHasTrialHistory = true;
-        break;
-      }
-    }
-    
-    // If trial was already used (by telegramId OR username) -> NOT eligible
-    if (hasTrialHistory || usernameHasTrialHistory) {
-      // Show pricing plans directly
-      const availablePlans = await firebaseDB.getAllPlans();
-      const keyboard = availablePlans.map(plan => {
-        let displayPrice;
-        if (plan.name.includes('Month') && !plan.name.includes('3') && !plan.name.includes('6')) {
-          const pricePerAccount = MONTHLY_PRICE;
-          displayPrice = `$${pricePerAccount * usernames.length}`;
-        } else {
-          displayPrice = `$${(plan.priceCents / 100) * usernames.length}`;
-        }
-        return [Markup.button.callback(`${plan.name} - ${displayPrice}`, `plan_${plan.id}_${usernames.length}`)];
-      });
-      
-      await ctx.reply('Select your plan:', Markup.inlineKeyboard(keyboard));
-      return;
-    }
-    
-    // If trial has NEVER been used -> Eligible for free trial!
+    // Show subscription plans directly (no trial)
     await ctx.reply(
       `✅ You have given ${usernames.length} username(s):\n${usernames.join(', ')}\n\n` +
-      `🎁 *You're eligible for a 30-MINUTE FREE TRIAL!*\n\n` +
-      `Choose an option:`,
-      {
-        parse_mode: 'Markdown',
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '🎁 Claim 30-Min Free Trial', callback_data: 'claim_free_trial' }],
-            [{ text: '💎 Buy Subscription Plan', callback_data: 'show_buy_plans' }]
-          ]
-        }
-      }
-    );
-    
-  } catch (error) {
-    console.error('Text handler error:', error);
-    await ctx.reply('❌ An error occurred. Please try /start again.');
-  }
-});
-
-// Handle "Claim Free Trial" button
-bot.action('claim_free_trial', async (ctx) => {
-  await ctx.answerCbQuery();
-  const telegramUserId = ctx.from.id.toString();
-  const session = userSessions.get(telegramUserId);
-  
-  if (!session || !session.usernames) {
-    await ctx.reply('❌ Session expired. Please use /start again.');
-    return;
-  }
-  
-  try {
-    const usernames = session.usernames;
-    
-    // DOUBLE CHECK - Prevent duplicate trial grants
-    const hasTrialHistory = await firebaseDB.hasUsedTrial(telegramUserId);
-    
-    if (hasTrialHistory) {
-      await ctx.reply('❌ You have already used your free trial. Please purchase a subscription.');
-      return;
-    }
-    
-    // Find or create user
-    let user = await firebaseDB.findUserByTelegramId(telegramUserId);
-    if (!user) {
-      user = await firebaseDB.createUser({
-        telegramUserId,
-        status: 'active',
-        trialClaimedAt: new Date().toISOString()
-      });
-    } else {
-      await firebaseDB.updateUser(user.id, {
-        trialClaimedAt: new Date().toISOString(),
-        status: 'active'
-      });
-    }
-    
-    // Grant free trial
-    await grantFreeTrial(ctx, user, usernames);
-    
-    // Clear session
-    userSessions.delete(telegramUserId);
-    
-  } catch (error) {
-    console.error('Claim free trial error:', error);
-    await ctx.reply('❌ Error claiming trial. Please try again.');
-  }
-});
-
-// Handle "Buy Subscription Plan" button
-bot.action('show_buy_plans', async (ctx) => {
-  await ctx.answerCbQuery();
-  const telegramUserId = ctx.from.id.toString();
-  const session = userSessions.get(telegramUserId);
-  
-  if (!session || !session.usernames) {
-    await ctx.reply('❌ Session expired. Please use /start again.');
-    return;
-  }
-  
-  try {
-    const usernames = session.usernames;
-    
-    // Get or create user
-    let user = await firebaseDB.findUserByTelegramId(telegramUserId);
-    
-    if (!user) {
-      user = await firebaseDB.createUser({
-        telegramUserId,
-        status: 'pending',
-      });
-    }
-    
-    // Show confirmation
-    await ctx.reply(
-      `You have selected ${usernames.length} username(s): ${usernames.join(', ')}\n\n` +
-      `Please choose a subscription period:`,
+      `💎 *Choose a subscription plan to get started:*`,
       { parse_mode: 'Markdown' }
     );
     
-    // Get available plans
     const availablePlans = await firebaseDB.getAllPlans();
-    
-    // Create inline keyboard with plan buttons
     const keyboard = availablePlans.map(plan => {
       let displayPrice;
       if (plan.name.includes('Month') && !plan.name.includes('3') && !plan.name.includes('6')) {
@@ -563,101 +433,18 @@ bot.action('show_buy_plans', async (ctx) => {
       } else {
         displayPrice = `$${(plan.priceCents / 100) * usernames.length}`;
       }
-      
       return [Markup.button.callback(`${plan.name} - ${displayPrice}`, `plan_${plan.id}_${usernames.length}`)];
     });
     
-    await ctx.reply(
-      'Select your plan:',
-      Markup.inlineKeyboard(keyboard)
-    );
+    await ctx.reply('Select your plan:', Markup.inlineKeyboard(keyboard));
     
   } catch (error) {
-    console.error('Show buy plans error:', error);
-    await ctx.reply('❌ Error loading plans. Please try again.');
+    console.error('Text handler error:', error);
+    await ctx.reply('❌ An error occurred. Please try /start again.');
   }
 });
 
-// Grant 30-minute free trial
-async function grantFreeTrial(ctx, user, usernames) {
-  try {
-    const telegramUserId = ctx.from.id.toString();
-    const chatId = ctx.chat.id.toString();
-    
-    // Mark trial as claimed
-    await firebaseDB.updateUser(user.id, { 
-      trialClaimedAt: new Date().toISOString(),
-      status: 'active'
-    });
-    
-    // Calculate 30-minute expiry (stored in UTC)
-    const expiryAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
-    
-    // Create a trial subscription record with telegramChatId (for notifications)
-    await firebaseDB.createSubscription({
-      orderId: `TRIAL-${Date.now()}`,
-      userId: user.id,
-      planId: 0, // Trial plan
-      status: 'active',
-      telegramChatId: chatId,
-      pendingUsernames: usernames,
-      expiresAt: expiryAt.toISOString()
-    });
-    
-    // Create shuffle accounts with 30-minute expiry AND record trial history
-    for (const username of usernames) {
-      await firebaseDB.createShuffleAccount({
-        userId: user.id,
-        username,
-        status: 'active',
-        expiryAt: expiryAt.toISOString()
-      });
-      
-      // Record trial history (permanent record to prevent abuse)
-      await firebaseDB.createTrialHistory({
-        telegramUserId,
-        username
-      });
-    }
-    
-    // Format expiry time in UTC with clear label
-    const expiryTimeStr = expiryAt.toISOString().split('T')[1].split('.')[0]; // HH:MM:SS
-    const expiryDateStr = expiryAt.toISOString().split('T')[0]; // YYYY-MM-DD
-    
-    await ctx.reply(
-      `🎉 *CONGRATULATIONS!*\n\n` +
-      `You've been granted a *30-MINUTE FREE TRIAL!*\n\n` +
-      `✅ Your accounts are now *ACTIVE* and will auto-claim codes:\n` +
-      usernames.map((u, i) => `  ${i + 1}. ${u}`).join('\n') + '\n\n' +
-      `⏰ Trial expires in *30 minutes*\n` +
-      `   (${expiryDateStr} ${expiryTimeStr} UTC)\n\n` +
-      `After your trial ends, choose a subscription plan to continue enjoying auto-claiming!\n\n` +
-      `🎰 *Start using it now - codes will auto-claim automatically!*`,
-      { 
-        parse_mode: 'Markdown',
-        ...Markup.inlineKeyboard([
-          [Markup.button.url('🚀 Setup Your Bot Now', 'https://shufflecodeclaimer.com/#guide')]
-        ])
-      }
-    );
-    
-    // Show subscription button for later
-    await ctx.reply(
-      'When ready to subscribe:',
-      Markup.inlineKeyboard([
-        [Markup.button.callback('💎 View Subscription Plans', 'show_plans_' + usernames.length)]
-      ])
-    );
-    
-    console.log(`✅ Free trial granted to user ${telegramUserId} for ${usernames.length} accounts`);
-    
-  } catch (error) {
-    console.error('Error granting free trial:', error);
-    await ctx.reply('❌ Error activating free trial. Please try again.');
-  }
-}
-
-// Handle "show plans" button after trial
+// Handle "show plans" button
 bot.action(/^show_plans_(\d+)$/, async (ctx) => {
   await ctx.answerCbQuery();
   
@@ -710,7 +497,7 @@ async function notifyPaymentConfirmed(telegramUserId, messageId, subscriptionDet
       { 
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
-          [Markup.button.url('🚀 Setup Your Bot Now', 'https://shufflecodeclaimer.com/#guide')]
+          [Markup.button.url('🚀 Setup Your Bot Now', 'https://shufflecodeclaimer.onrender.com/#guide')]
         ])
       }
     );
