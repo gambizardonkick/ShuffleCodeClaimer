@@ -28,7 +28,6 @@ class FirebaseDB {
       telegramUserId: userData.telegramUserId,
       shuffleUsername: userData.shuffleUsername || null,
       status: userData.status || 'pending',
-      trialClaimedAt: userData.trialClaimedAt || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -448,39 +447,6 @@ class FirebaseDB {
 
     await logsRef.child(logId.toString()).set(newLog);
     return { id: logId, ...newLog };
-  }
-
-  async createTrialHistory(historyData) {
-    const historyRef = this.db.ref('trialHistory');
-    const historyId = await this.getNextId('trialHistory');
-    
-    const newHistory = {
-      telegramUserId: historyData.telegramUserId,
-      username: historyData.username.toLowerCase(),
-      claimedAt: new Date().toISOString(),
-    };
-
-    await historyRef.child(historyId.toString()).set(newHistory);
-    return { id: historyId, ...newHistory };
-  }
-
-  async hasUsedTrial(telegramUserId, username = null) {
-    const historyRef = this.db.ref('trialHistory');
-    
-    const telegramSnapshot = await historyRef.orderByChild('telegramUserId').equalTo(telegramUserId).once('value');
-    if (telegramSnapshot.exists()) {
-      return true;
-    }
-    
-    if (username) {
-      const normalizedUsername = username.toLowerCase();
-      const usernameSnapshot = await historyRef.orderByChild('username').equalTo(normalizedUsername).once('value');
-      if (usernameSnapshot.exists()) {
-        return true;
-      }
-    }
-    
-    return false;
   }
 
   async deleteExpiredShuffleAccounts() {
